@@ -1,0 +1,115 @@
+
+Ipv6 vista previa · HTML
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IPv6 – Vista previa de la presentación</title>
+<style>
+  html,body{margin:0;height:100%;background:#2a120b;overflow:hidden;font-family:Calibri,Carlito,Arial,sans-serif}
+  #stage{position:absolute;left:50%;top:50%;width:960px;height:540px;transform-origin:center;overflow:hidden;box-shadow:0 8px 40px #000a}
+  .slide{position:absolute;inset:0;display:none}
+  .slide.on{display:block}
+  .el{position:absolute;box-sizing:border-box;display:flex;align-items:center;transition:opacity .5s,clip-path .5s;white-space:pre-line;line-height:1.15}
+  .el.hide{opacity:0}
+  .el.wipe.hide{clip-path:inset(0 100% 0 0);opacity:1}
+  .el.wipe{clip-path:inset(0 0 0 0)}
+  .el.link{cursor:pointer}
+  .el.link:hover{filter:brightness(1.08);outline:3px solid #F4A62A}
+  #hud{position:fixed;bottom:8px;left:0;right:0;text-align:center;color:#fdd;font:13px Arial;opacity:.7}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="hud">Clic / Espacio / → avanza · ← retrocede · en el quiz haz clic en una opción</div>
+<script>
+const DARK='#4A1D12',TERRA='#C8462B',AMBER='#F4A62A',PEACH='#FDE3C8',BG='#FFF5EA',INK='#3A1A10',RED='#D62828',WRONG='#B5301F',WHITE='#fff';
+const P=96, R=t=>`<span style="color:${RED};font-weight:700">${t}</span>`;
+// e(texto, x,y,w,h, opciones) — medidas en pulgadas como en el PPTX; s = clic en el que aparece (0 = fijo)
+const e=(t,x,y,w,h,o={})=>Object.assign({t,x,y,w,h},o);
+const title=(t,c)=>e(t,.6,.35,8.8,.9,{fs:36,b:1,c:c||DARK,f:'Cambria,Georgia,serif'});
+const box=(t,x,y,w,h,o={})=>e(t,x,y,w,h,Object.assign({bg:TERRA,c:WHITE,b:1,al:'center',r:.15},o));
+ 
+const hx=['2001','0db8','0000','0000','0000','0000','0000','0001'];
+const opts=['A)  2001:db8::0::1','B)  2001:db8::1','C)  2001:db:0:0:0:0:0:1'];
+const slides=[
+ {bg:DARK,els:[
+  e('Reglas de Direccionamiento y Sintaxis IPv6',.6,.9,8.8,1.9,{fs:40,b:1,c:WHITE,f:'Cambria,Georgia,serif'}),
+  e('Unidad 3 · Direccionamiento IPv6 y Protocolos TCP/IP · 3.3',.6,2.9,8.8,.8,{fs:20,c:PEACH}),
+  e('2001:db8::1',.6,3.9,8.8,1.1,{fs:60,b:1,c:AMBER,s:1,eff:'wipe'})]},
+ {bg:BG,els:[title('Sintaxis: 8 hextetos'),
+  ...hx.map((v,i)=>box(v,.65+i*1.1,1.6,.95,.9,{fs:28,bg:i%2?TERRA:WRONG,s:1,d:i*200})),
+  e('4 dígitos hex = 16 bits · separados por ":"',.65,2.75,8.7,.5,{fs:20,al:'center',s:2}),
+  e('8 × 16 = 128 bits',.6,3.6,8.8,1.1,{fs:48,b:1,c:TERRA,al:'center',s:3,eff:'wipe'})]},
+ {bg:BG,els:[title('Regla 1: ceros a la izquierda'),
+  e('Antes',1.65,1.4,2.8,.45,{fs:20,b:1,c:WRONG,al:'center'}),e('Después',5.55,1.4,2.8,.45,{fs:20,b:1,c:WRONG,al:'center'}),
+  ...[[R('0')+'db8','db8'],[R('000')+'0','0'],[R('000')+'1','1']].flatMap(([a,b],r)=>{const y=1.95+r*.8;return[
+   e(a,1.65,y,2.8,.65,{fs:28,bg:PEACH,r:.12,al:'center',s:r+1}),
+   e('→',4.45,y,1.1,.65,{fs:32,b:1,c:TERRA,al:'center',s:r+1,d:150}),
+   box(b,5.55,y,2.8,.65,{fs:28,s:r+1,d:300,eff:'wipe'})]}),
+  e('2001:db8:0:0:0:0:0:1',.6,4.4,8.8,.7,{fs:32,b:1,c:TERRA,al:'center',s:4,eff:'wipe'})]},
+ {bg:BG,els:[title('Regla 2: compresión con ::'),
+  ...['2001','db8','0','0','0','0','0','1'].map((v,i)=>box(v,.65+i*1.1,1.5,.95,.85,{fs:28,bg:(i>1&&i<7)?AMBER:TERRA,c:(i>1&&i<7)?INK:WHITE})),
+  box('2001',.65,2.85,.95,.85,{fs:28,s:1}),box('db8',1.75,2.85,.95,.85,{fs:28,s:1,d:150}),
+  box('::',2.85,2.85,5.35,.85,{fs:36,bg:AMBER,c:INK,s:1,d:300,eff:'wipe'}),box('1',8.35,2.85,.95,.85,{fs:28,s:1,d:450}),
+  e('5 hextetos en cero → ::',2.85,3.75,5.35,.4,{fs:20,al:'center',s:1,d:600}),
+  e('2001:db8::1',.6,4.3,8.8,.85,{fs:48,b:1,c:TERRA,al:'center',s:2,eff:'wipe'})]},
+ {bg:BG,els:[title('Solo un :: por dirección'),
+  e('Dirección: 2001:0:0:1:0:0:0:1',.6,1.4,8.8,.5,{fs:24}),
+  e('INCORRECTO\n<b style="font-size:32pt">2001::1::1</b>\n¿Cuántos ceros va en cada ::?',.6,2.1,4.2,2.7,{fs:20,bg:WRONG,c:WHITE,r:.15,al:'center',col:1,s:1,eff:'wipe',html:1}),
+  e('CORRECTO\n<b style="font-size:32pt">2001:0:0:1::1</b>\nUn solo ::, sin ambigüedad',5.2,2.1,4.2,2.7,{fs:20,bg:AMBER,c:INK,r:.15,al:'center',col:1,s:2,eff:'wipe',html:1})]},
+ {bg:BG,els:[title('Ponte a prueba'),
+  e('2001:0db8:0000:0000:0000:0000:0000:0001',.6,1.3,8.8,.6,{fs:28,b:1,c:TERRA}),
+  e('¿Cuál es su forma abreviada correcta?',.6,1.95,8.8,.45,{fs:20}),
+  ...opts.map((t,i)=>e(t,.6,2.6+i*.85,8.8,.7,{fs:28,bg:PEACH,r:.15,pad:.3,s:1,d:i*200,link:i==1?6:4}))]},
+ {bg:DARK,els:[title('Resumen',WHITE),
+  e('Repetir quiz',7.4,.45,2,.4,{fs:16,c:AMBER,al:'right',u:1,link:5}),
+  ...['Quita ceros a la izquierda','Comprime ceros con ::','Usa :: solo una vez'].flatMap((t,i)=>[
+   box(String(i+1),.6,1.5+i*.9,.7,.7,{fs:28,bg:AMBER,c:INK,r:.35,s:i+1}),
+   e(t,1.55,1.5+i*.9,7.8,.7,{fs:28,c:WHITE,s:i+1,d:150,eff:'wipe'})]),
+  e('2001:db8::1',.6,4.25,8.8,.9,{fs:48,b:1,c:AMBER,al:'center',s:4,eff:'wipe'})]}
+];
+ 
+const stage=document.getElementById('stage');
+const maxStep=slides.map(s=>Math.max(0,...s.els.map(x=>x.s||0)));
+let cur=0,step=0;
+slides.forEach((sl,si)=>{
+  const d=document.createElement('div');d.className='slide';d.style.background=sl.bg;
+  sl.els.forEach(o=>{
+    const n=document.createElement('div');
+    n.className='el'+(o.eff==='wipe'?' wipe':'')+(o.link!=null?' link':'')+(o.s?' hide':'');
+    Object.assign(n.style,{left:o.x*P+'px',top:o.y*P+'px',width:o.w*P+'px',height:o.h*P+'px',
+      fontSize:(o.fs||28)*4/3+'px',color:o.c||INK,fontWeight:o.b?700:400,
+      fontFamily:o.f||'',background:o.bg||'none',borderRadius:o.r?o.r*P+'px':'0',
+      justifyContent:o.al==='center'?'center':o.al==='right'?'flex-end':'flex-start',
+      textAlign:o.al||'left',padding:(o.pad?o.pad*P:5)+'px',
+      textDecoration:o.u?'underline':'none',transitionDelay:(o.d||0)+'ms'});
+    if(o.col){n.style.flexDirection='column';n.style.justifyContent='center'}
+    if(o.html)n.innerHTML=o.t.replace(/\n/g,'<br>');else n.innerHTML=o.t;
+    if(o.s)n.dataset.s=o.s;
+    if(o.link!=null)n.onclick=ev=>{ev.stopPropagation();go(o.link)};
+    d.appendChild(n);
+  });
+  stage.appendChild(d);
+});
+function render(){
+  [...stage.children].forEach((d,i)=>{
+    d.classList.toggle('on',i===cur);
+    if(i===cur)d.querySelectorAll('[data-s]').forEach(n=>n.classList.toggle('hide',+n.dataset.s>step));
+  });
+}
+function go(i){cur=Math.max(0,Math.min(slides.length-1,i));step=0;render()}
+function next(){ if(step<maxStep[cur])step++; else if(cur<slides.length-1){cur++;step=0} render() }
+function prev(){ if(step>0)step--; else if(cur>0){cur--;step=maxStep[cur]} render() }
+document.addEventListener('click',next);
+document.addEventListener('keydown',k=>{
+  if(['ArrowRight','ArrowDown',' ','Enter','PageDown'].includes(k.key)){k.preventDefault();next()}
+  if(['ArrowLeft','ArrowUp','PageUp','Backspace'].includes(k.key)){k.preventDefault();prev()}
+});
+function fit(){const s=Math.min(innerWidth/960,(innerHeight-24)/540);stage.style.transform=`translate(-50%,-50%) scale(${s})`}
+addEventListener('resize',fit);fit();render();
+</script>
+</body>
+</html>
+ 
