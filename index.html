@@ -1,32 +1,36 @@
 <!DOCTYPE html>
-<html lang="es" class="h-full bg-stone-900 select-none">
+<html lang="es" class="h-full bg-slate-900 select-none">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reglas de Direccionamiento y Sintaxis IPv6</title>
+  <title>IPv6: Reglas de Direccionamiento y Sintaxis</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@500;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@600;700&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            brand: {
-              dark: '#2A120B',
-              card: '#3A1A10',
-              terra: '#C8462B',
-              amber: '#F4A62A',
-              peach: '#FDE3C8',
-              bg: '#1C0A05',
-              wrong: '#E63946',
-              correct: '#2A9D8F'
+            pres: {
+              bg: '#F8FAFC',        /* Ultra-clean off-white background */
+              card: '#FFFFFF',      /* Crisp white cards */
+              border: '#E2E8F0',    /* Subtle light borders */
+              text: '#0F172A',      /* Deep dark slate text for maximum readability */
+              muted: '#475569',     /* Medium slate for secondary text */
+              navy: '#1E3A8A',      /* Deep navy primary header */
+              blue: '#0284C7',      /* Vibrant blue primary accent */
+              emerald: '#059669',   /* Success green */
+              red: '#DC2626',       /* Error red */
+              indigo: '#4F46E5',    /* Highlight indigo */
+              amber: '#D97706'      /* Amber warning accent */
             }
           },
           fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            sans: ['"Inter"', 'sans-serif'],
             mono: ['"Fira Code"', 'monospace']
           }
         }
@@ -35,141 +39,136 @@
   </script>
 
   <style>
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      20%, 60% { transform: translateX(-8px); }
-      40%, 80% { transform: translateX(8px); }
-    }
-    @keyframes pulseSuccess {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.04); }
-      100% { transform: scale(1); }
-    }
-    @keyframes wipeIn {
-      from { clip-path: inset(0 100% 0 0); opacity: 0; }
-      to { clip-path: inset(0 0 0 0); opacity: 1; }
-    }
-    @keyframes popIn {
-      0% { opacity: 0; transform: scale(0.85) translateY(12px); }
+    @keyframes entrancePop {
+      0% { opacity: 0; transform: scale(0.96) translateY(10px); }
       100% { opacity: 1; transform: scale(1) translateY(0); }
     }
-
-    .anim-shake { animation: shake 0.4s ease-in-out; }
-    .anim-pop { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-    .anim-wipe { animation: wipeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-    .anim-success { animation: pulseSuccess 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-
-    .glow-amber { box-shadow: 0 0 25px rgba(244, 166, 42, 0.35); }
-    .glow-terra { box-shadow: 0 0 25px rgba(200, 70, 43, 0.35); }
-
-    /* Custom smooth transition states */
-    .el-transition {
-      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    @keyframes entranceWipe {
+      0% { clip-path: inset(0 100% 0 0); opacity: 0; }
+      100% { clip-path: inset(0 0 0 0); opacity: 1; }
     }
-    .el-hidden {
-      opacity: 0;
-      transform: translateY(16px) scale(0.96);
-      pointer-events: none;
+    @keyframes shakeError {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
     }
-    .el-visible {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-      pointer-events: auto;
+
+    .anim-pop { animation: entrancePop 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .anim-wipe { animation: entranceWipe 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .anim-shake { animation: shakeError 0.4s ease-in-out; }
+
+    /* CRITICAL: Class assigned after animation plays once. Ensures NO REPEATING animations on backwards/forwards navigation */
+    .has-animated {
+      opacity: 1 !important;
+      transform: none !important;
+      clip-path: none !important;
+      animation: none !important;
+      transition: none !important;
     }
   </style>
 </head>
-<body class="h-full flex flex-col items-center justify-center p-2 sm:p-4 text-stone-100 overflow-hidden font-sans bg-[#1A0A06]">
+<body class="h-full flex flex-col items-center justify-center p-2 sm:p-4 text-pres-text overflow-hidden font-sans bg-slate-900">
 
-  <!-- Top Navigation & Progress Bar -->
-  <header class="w-full max-w-[960px] mb-3 flex items-center justify-between px-2 text-xs sm:text-sm">
+  <header class="w-full max-w-[960px] mb-2 sm:mb-3 flex items-center justify-between px-3 py-1.5 bg-slate-800/90 rounded-xl border border-slate-700 text-white shadow-md">
     <div class="flex items-center gap-2">
-      <span class="w-2.5 h-2.5 rounded-full bg-brand-amber animate-ping"></span>
-      <span class="font-bold tracking-wide text-brand-peach uppercase text-xs">Unidad 3 · 3.3 IPv6</span>
+      <span class="w-3 h-3 rounded-full bg-pres-blue animate-pulse"></span>
+      <span class="font-extrabold tracking-wide text-xs sm:text-sm text-slate-100 uppercase">IPv6 · Módulo de Sintaxis</span>
     </div>
 
     <!-- Slide progress dots -->
-    <div id="slide-dots" class="flex gap-1.5 sm:gap-2"></div>
+    <div id="slide-dots" class="flex gap-1.5"></div>
 
-    <div class="text-stone-400 font-mono text-xs">
-      <span id="slide-num" class="text-brand-amber font-bold">1</span> / <span id="slide-total">7</span>
+    <div class="font-mono text-xs sm:text-sm text-slate-300 font-bold">
+      <span id="slide-num" class="text-pres-blue font-black">1</span> / <span id="slide-total">7</span>
     </div>
   </header>
 
-  <!-- Main 16:9 Presentation Canvas Container -->
-  <main class="relative w-full max-w-[960px] aspect-[16/9] bg-brand-dark rounded-2xl shadow-2xl overflow-hidden border border-amber-900/40 flex flex-col justify-between p-6 sm:p-10 select-none">
+  <main class="relative w-full max-w-[960px] aspect-[16/9] bg-pres-bg rounded-2xl shadow-2xl overflow-hidden border-2 border-slate-700 flex flex-col justify-between p-6 sm:p-10 select-none">
     
-    <!-- Background Decorative Gradients -->
-    <div class="absolute -top-24 -left-24 w-72 h-72 bg-brand-terra/20 rounded-full blur-3xl pointer-events-none"></div>
-    <div class="absolute -bottom-24 -right-24 w-80 h-80 bg-brand-amber/10 rounded-full blur-3xl pointer-events-none"></div>
-
-    <!-- Dynamic Slide Content Area -->
-    <div id="slide-content" class="relative w-full h-full flex flex-col justify-between z-10">
-      <!-- Injected via JS -->
+    <!-- Dynamic Slide Content Container -->
+    <div id="slide-content" class="relative w-full h-full flex flex-col justify-between z-10 text-pres-text">
+      <!-- Content populated by JavaScript -->
     </div>
 
   </main>
 
-  <!-- Bottom Interactive Controls & HUD -->
-  <footer class="w-full max-w-[960px] mt-4 flex flex-col sm:flex-row items-center justify-between gap-3 px-2">
-    <div class="text-xs text-stone-400 hidden sm:flex items-center gap-3">
-      <span class="bg-stone-800/80 px-2 py-1 rounded border border-stone-700/50 font-mono text-[11px] text-stone-300">Space / ← →</span>
+  <footer class="w-full max-w-[960px] mt-2 sm:mt-3 flex items-center justify-between gap-3 px-3 py-2 bg-slate-800/90 rounded-xl border border-slate-700 shadow-md">
+    <div class="text-xs text-slate-300 hidden sm:flex items-center gap-3">
+      <span class="bg-slate-700 px-2 py-0.5 rounded text-white font-mono font-bold text-[11px]">← → / Espacio</span>
       <span>Navegar pasos</span>
-      <span class="text-stone-600">|</span>
-      <span class="bg-stone-800/80 px-2 py-1 rounded border border-stone-700/50 font-mono text-[11px] text-stone-300">Clic</span>
+      <span class="text-slate-500">|</span>
+      <span class="bg-slate-700 px-2 py-0.5 rounded text-white font-mono font-bold text-[11px]">Clic</span>
       <span>Avanzar</span>
     </div>
 
-    <!-- Navigation Action Buttons -->
+    <!-- Navigation Control Buttons -->
     <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
-      <button id="btn-prev" onclick="prevStep()" class="px-4 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 active:scale-95 text-stone-200 text-sm font-semibold transition border border-stone-700/50 flex items-center gap-2">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+      <button id="btn-prev" onclick="prevStep()" class="px-4 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 active:scale-95 text-white text-xs sm:text-sm font-bold transition flex items-center gap-1.5">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
         Anterior
       </button>
 
-      <button id="btn-restart" onclick="goToSlide(0)" class="p-2 rounded-xl bg-stone-800/80 hover:bg-stone-700 text-stone-400 hover:text-stone-200 transition border border-stone-700/50" title="Reiniciar presentación">
+      <button id="btn-restart" onclick="goToSlide(0)" class="p-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white transition" title="Ir a la Portada">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
       </button>
 
-      <button id="btn-next" onclick="nextStep()" class="px-5 py-2 rounded-xl bg-brand-terra hover:bg-orange-600 active:scale-95 text-white text-sm font-bold shadow-lg shadow-brand-terra/30 transition flex items-center gap-2">
+      <button id="btn-next" onclick="nextStep()" class="px-5 py-1.5 rounded-lg bg-pres-blue hover:bg-sky-600 active:scale-95 text-white text-xs sm:text-sm font-black shadow-md transition flex items-center gap-1.5">
         Siguiente
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
       </button>
     </div>
   </footer>
 
   <script>
-    // Colors & Design Tokens
-    const RED_HIGHLIGHT = '#F87171';
-    
+    // Set for recording elements that have completed their animation once.
+    // Format: "slideIdx-stepIdx-elementUniqueId"
+    const animatedTracker = new Set();
+
+    function markAnimated(key) {
+      animatedTracker.add(key);
+    }
+
+    function isAnimated(key) {
+      return animatedTracker.has(key);
+    }
+
+    // Helper returning either animation class (first render) or static frozen class (subsequent renders)
+    function getAnimClass(key, animType = 'pop') {
+      if (isAnimated(key)) {
+        return 'has-animated';
+      }
+      markAnimated(key);
+      return animType === 'wipe' ? 'anim-wipe' : 'anim-pop';
+    }
+
     const slides = [
       // -------------------------------------------------------------
       // SLIDE 0: Portada
       // -------------------------------------------------------------
       {
         id: 'portada',
-        bg: 'bg-brand-dark',
         maxSteps: 1,
         render: (step) => `
           <div class="h-full flex flex-col justify-center items-center text-center px-4">
-            <span class="inline-block px-3 py-1 mb-4 text-xs font-bold tracking-widest text-brand-amber bg-brand-amber/10 border border-brand-amber/30 rounded-full uppercase">
-              Lección Interactiva
+            <span class="inline-block px-4 py-1.5 mb-4 text-xs sm:text-sm font-extrabold tracking-widest text-pres-navy bg-blue-100 border-2 border-blue-200 rounded-full uppercase">
+              Unidad 3 · Direccionamiento TCP/IP
             </span>
-            <h1 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight mb-4 max-w-2xl">
+            <h1 class="text-3xl sm:text-5xl font-black text-pres-navy tracking-tight leading-tight mb-4 max-w-3xl">
               Reglas de Direccionamiento y Sintaxis IPv6
             </h1>
-            <p class="text-base sm:text-xl text-brand-peach/80 font-medium max-w-xl mb-8">
-              Unidad 3 · Direccionamiento IPv6 y Protocolos TCP/IP · 3.3
+            <p class="text-base sm:text-xl text-pres-muted font-semibold max-w-2xl mb-8">
+              Guía técnica sobre compresión y simplificación de direcciones de red de 128 bits.
             </p>
             
             <div class="h-20 flex items-center justify-center">
               ${step >= 1 ? `
-                <div class="anim-wipe bg-stone-900/90 border border-brand-amber/50 rounded-2xl px-6 py-3 shadow-xl glow-amber">
-                  <span class="font-mono text-2xl sm:text-4xl font-bold text-brand-amber tracking-wider">
+                <div class="${getAnimClass('s0-step1', 'wipe')} bg-white border-4 border-pres-blue rounded-2xl px-8 py-3 shadow-2xl">
+                  <span class="font-mono text-2xl sm:text-4xl font-black text-pres-navy tracking-wider">
                     2001:db8::1
                   </span>
                 </div>
               ` : `
-                <span class="text-xs text-stone-500 animate-pulse">Presiona 'Siguiente' o haz clic para revelar el formato resumido</span>
+                <span class="text-xs sm:text-sm text-pres-muted font-bold animate-bounce">Haz clic o presiona 'Siguiente' para comenzar</span>
               `}
             </div>
           </div>
@@ -177,56 +176,60 @@
       },
 
       // -------------------------------------------------------------
-      // SLIDE 1: Sintaxis: 8 hextetos
+      // SLIDE 1: Sintaxis - 8 hextetos
       // -------------------------------------------------------------
       {
         id: 'hextetos',
-        bg: 'bg-[#220E07]',
         maxSteps: 3,
         render: (step) => {
           const hextets = ['2001','0db8','0000','0000','0000','0000','0000','0001'];
           return `
             <div class="h-full flex flex-col justify-between">
               <div>
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Sintaxis: 8 hextetos</h2>
-                <p class="text-sm text-brand-peach/70 mt-1">Estructura completa de una dirección IPv6 sin comprimir</p>
+                <span class="text-xs font-black uppercase tracking-wider text-pres-blue">Estructura Fundamental</span>
+                <h2 class="text-2xl sm:text-3xl font-black text-pres-navy">Sintaxis: 8 Hextetos</h2>
+                <p class="text-sm font-medium text-pres-muted mt-0.5">Una dirección IPv6 completa está formada por 8 bloques hexadecimales delimitados por dos puntos (:).</p>
               </div>
 
-              <!-- Hextets Grid -->
-              <div class="my-auto py-4">
-                <div class="grid grid-cols-4 sm:grid-cols-8 gap-2 sm:gap-2.5">
+              <!-- Interactive Hextets Grid -->
+              <div class="my-auto py-2">
+                <div class="grid grid-cols-4 sm:grid-cols-8 gap-2">
                   ${hextets.map((v, i) => {
                     const visible = step >= 1;
+                    if (!visible) return `<div class="h-16 border-2 border-dashed border-slate-300 rounded-xl bg-slate-100"></div>`;
+                    
                     const isEven = i % 2 === 0;
-                    const bgClass = isEven ? 'bg-brand-terra' : 'bg-rose-900/80';
+                    const bgClass = isEven ? 'bg-blue-50 border-pres-blue text-pres-navy' : 'bg-indigo-50 border-pres-indigo text-pres-indigo';
+                    const animCls = getAnimClass(`s1-hextet-${i}`, 'pop');
+
                     return `
-                      <div class="el-transition ${visible ? 'el-visible anim-pop' : 'el-hidden'} ${bgClass} p-3 rounded-xl border border-white/10 text-center shadow-lg group hover:scale-105 hover:border-brand-amber transition cursor-pointer" style="animation-delay: ${i * 60}ms">
-                        <span class="block font-mono text-base sm:text-xl font-bold text-white group-hover:text-brand-amber transition">${v}</span>
-                        <span class="block text-[9px] text-stone-300 font-mono mt-0.5">H${i+1}</span>
+                      <div class="${animCls} ${bgClass} p-3 rounded-xl border-2 text-center shadow-md font-mono">
+                        <span class="block text-base sm:text-xl font-black">${v}</span>
+                        <span class="block text-[10px] font-bold text-pres-muted mt-0.5 uppercase">Hexteto ${i+1}</span>
                       </div>
                     `;
                   }).join('')}
                 </div>
 
-                <div class="mt-6 text-center space-y-2">
+                <div class="mt-6 text-center space-y-2.5">
                   ${step >= 2 ? `
-                    <div class="anim-pop inline-block px-4 py-1.5 rounded-lg bg-stone-900/80 border border-stone-700 text-stone-300 font-mono text-sm sm:text-base">
-                      4 dígitos hexadecimales = <span class="text-brand-amber font-bold">16 bits</span> por hexteto
+                    <div class="${getAnimClass('s1-step2', 'pop')} inline-block px-5 py-2 rounded-xl bg-slate-100 border-2 border-slate-300 text-pres-navy font-mono text-xs sm:text-sm font-bold">
+                      4 dígitos hexadecimales × 4 bits = <span class="text-pres-blue font-black">16 bits por hexteto</span>
                     </div>
                   ` : ''}
 
                   ${step >= 3 ? `
-                    <div class="anim-wipe block text-center mt-3">
-                      <span class="inline-block px-6 py-2 rounded-xl bg-brand-terra font-mono text-2xl sm:text-3xl font-extrabold text-white shadow-lg glow-terra">
-                        8 × 16 = <span class="text-brand-amber">128 bits</span> totales
+                    <div class="${getAnimClass('s1-step3', 'wipe')} block text-center">
+                      <span class="inline-block px-6 py-2.5 rounded-xl bg-pres-navy font-mono text-lg sm:text-2xl font-black text-white shadow-xl border-2 border-pres-blue">
+                        8 hextetos × 16 bits = <span class="text-sky-300">128 bits totales</span>
                       </span>
                     </div>
                   ` : ''}
                 </div>
               </div>
 
-              <div class="text-xs text-stone-500 text-center">
-                Cada hexteto está separado por dos puntos (:)
+              <div class="text-xs text-pres-muted text-center font-semibold">
+                Cada dígito hexadecimal equivale a 4 bits en binario.
               </div>
             </div>
           `;
@@ -234,51 +237,52 @@
       },
 
       // -------------------------------------------------------------
-      // SLIDE 2: Regla 1: Ceros a la izquierda
+      // SLIDE 2: Regla 1 - Omisión de ceros a la izquierda
       // -------------------------------------------------------------
       {
         id: 'regla1',
-        bg: 'bg-[#220E07]',
         maxSteps: 4,
         render: (step) => {
           const rows = [
-            { before: `<span class="text-rose-400 font-bold">0</span>db8`, after: 'db8', stepReq: 1 },
-            { before: `<span class="text-rose-400 font-bold">000</span>0`, after: '0', stepReq: 2 },
-            { before: `<span class="text-rose-400 font-bold">000</span>1`, after: '1', stepReq: 3 }
+            { before: `<span class="text-pres-red font-black">0</span>db8`, after: 'db8', stepReq: 1, id: 'r1-1' },
+            { before: `<span class="text-pres-red font-black">000</span>0`, after: '0', stepReq: 2, id: 'r1-2' },
+            { before: `<span class="text-pres-red font-black">000</span>1`, after: '1', stepReq: 3, id: 'r1-3' }
           ];
 
           return `
             <div class="h-full flex flex-col justify-between">
               <div>
-                <span class="text-xs font-bold uppercase tracking-wider text-brand-amber">Regla 1</span>
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Omisión de ceros a la izquierda</h2>
-                <p class="text-sm text-brand-peach/70 mt-1">Los ceros iniciales de cada hexteto se pueden omitir (los ceros finales NO).</p>
+                <span class="text-xs font-black uppercase tracking-wider text-pres-blue">Regla 1</span>
+                <h2 class="text-2xl sm:text-3xl font-black text-pres-navy">Eliminación de Ceros a la Izquierda</h2>
+                <p class="text-sm font-medium text-pres-muted mt-0.5">Se omiten los ceros iniciales de cualquier hexteto para simplificar la escritura.</p>
               </div>
 
-              <!-- Transformations Table -->
+              <!-- Step-by-step Transformation Grid -->
               <div class="my-auto space-y-3 max-w-2xl mx-auto w-full">
-                <div class="grid grid-cols-11 gap-2 text-xs uppercase tracking-wider text-stone-400 font-bold px-2 text-center">
+                <div class="grid grid-cols-11 gap-2 text-xs uppercase tracking-wider text-pres-muted font-extrabold px-2 text-center">
                   <div class="col-span-5">Forma Completa</div>
                   <div class="col-span-1"></div>
-                  <div class="col-span-5">Forma Abreviada</div>
+                  <div class="col-span-5">Forma Reducida</div>
                 </div>
 
-                ${rows.map((r, idx) => {
+                ${rows.map((r) => {
                   const visible = step >= r.stepReq;
+                  const animCls = visible ? getAnimClass(`s2-${r.id}`, 'wipe') : '';
+
                   return `
                     <div class="grid grid-cols-11 gap-2 items-center text-center">
                       <!-- Before -->
-                      <div class="col-span-5 p-3 rounded-xl bg-brand-card/80 border border-stone-700/60 font-mono text-lg sm:text-xl font-semibold text-stone-200">
+                      <div class="col-span-5 p-2.5 rounded-xl bg-red-50 border-2 border-red-200 font-mono text-base sm:text-lg font-bold text-pres-navy">
                         ${r.before}
                       </div>
 
                       <!-- Arrow -->
-                      <div class="col-span-1 text-brand-amber text-xl font-bold flex justify-center">
-                        ${visible ? `<span class="anim-pop">→</span>` : ''}
+                      <div class="col-span-1 text-pres-blue text-xl font-black flex justify-center">
+                        ${visible ? `→` : ''}
                       </div>
 
                       <!-- After -->
-                      <div class="col-span-5 p-3 rounded-xl ${visible ? 'bg-brand-terra font-bold text-white border-brand-amber/50 anim-wipe shadow-lg' : 'bg-stone-900/30 border border-stone-800 text-stone-600'} font-mono text-lg sm:text-xl border transition">
+                      <div class="col-span-5 p-2.5 rounded-xl ${visible ? `${animCls} bg-emerald-50 border-2 border-pres-emerald font-mono font-black text-pres-emerald shadow-sm` : 'bg-slate-100 border-2 border-slate-200 text-slate-400'} text-base sm:text-lg">
                         ${visible ? r.after : '...'}
                       </div>
                     </div>
@@ -286,18 +290,18 @@
                 }).join('')}
 
                 <!-- Resulting IPv6 Address -->
-                <div class="pt-4 h-16 flex items-center justify-center">
+                <div class="pt-2 h-16 flex items-center justify-center">
                   ${step >= 4 ? `
-                    <div class="anim-pop bg-stone-900 border-2 border-brand-amber/60 rounded-xl px-6 py-2 shadow-xl">
-                      <span class="text-xs text-brand-peach/60 block text-center uppercase tracking-wider font-semibold">Resultado de la Regla 1</span>
-                      <span class="font-mono text-xl sm:text-2xl font-bold text-brand-amber">2001:db8:0:0:0:0:0:1</span>
+                    <div class="${getAnimClass('s2-result', 'pop')} bg-blue-50 border-2 border-pres-blue rounded-xl px-6 py-2 text-center shadow-lg">
+                      <span class="text-[11px] text-pres-navy font-extrabold block uppercase tracking-wider">Dirección reducida con Regla 1</span>
+                      <span class="font-mono text-lg sm:text-2xl font-black text-pres-navy">2001:db8:0:0:0:0:0:1</span>
                     </div>
                   ` : ''}
                 </div>
               </div>
 
-              <div class="text-xs text-stone-500 text-center">
-                Atención: 0000 pasa a ser simplemente 0 (un solo cero se mantiene).
+              <div class="text-xs text-pres-muted text-center font-semibold">
+                Nota: Un hexteto con cuatro ceros "0000" se reduce a un único cero "0".
               </div>
             </div>
           `;
@@ -305,69 +309,66 @@
       },
 
       // -------------------------------------------------------------
-      // SLIDE 3: Regla 2: Compresión con ::
+      // SLIDE 3: Regla 2 - Compresión con ::
       // -------------------------------------------------------------
       {
         id: 'regla2',
-        bg: 'bg-[#220E07]',
         maxSteps: 2,
         render: (step) => {
           const original = ['2001','db8','0','0','0','0','0','1'];
           return `
             <div class="h-full flex flex-col justify-between">
               <div>
-                <span class="text-xs font-bold uppercase tracking-wider text-brand-amber">Regla 2</span>
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Compresión con doble dos puntos (::)</h2>
-                <p class="text-sm text-brand-peach/70 mt-1">Una secuencia contigua de hextetos en cero se reemplaza por '::'.</p>
+                <span class="text-xs font-black uppercase tracking-wider text-pres-blue">Regla 2</span>
+                <h2 class="text-2xl sm:text-3xl font-black text-pres-navy">Compresión de Ceros Continuos (::)</h2>
+                <p class="text-sm font-medium text-pres-muted mt-0.5">Una cadena contigua de hextetos nulos (ceros) se reemplaza por dos puntos dobles '::'.</p>
               </div>
 
               <div class="my-auto space-y-6">
-                <!-- Original row -->
+                <!-- Highlight zero block -->
                 <div>
-                  <span class="text-xs font-semibold text-stone-400 block mb-2 text-center">Dirección con Regla 1 aplicada:</span>
-                  <div class="flex justify-center items-center gap-1 sm:gap-2 font-mono">
+                  <span class="text-xs font-extrabold text-pres-muted block mb-2 text-center uppercase tracking-wider">Dirección con ceros individuales:</span>
+                  <div class="flex justify-center items-center gap-1 sm:gap-1.5 font-mono">
                     ${original.map((v, i) => {
                       const isZero = i >= 2 && i <= 6;
                       return `
-                        <div class="px-2.5 py-2 rounded-lg text-sm sm:text-lg font-bold border ${isZero ? 'bg-amber-500/20 border-brand-amber text-brand-amber' : 'bg-brand-card border-stone-700 text-stone-200'} text-center min-w-[2.5rem]">
+                        <div class="px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-base font-bold border-2 ${isZero ? 'bg-amber-100 border-amber-500 text-amber-900 font-black' : 'bg-slate-100 border-slate-300 text-pres-navy'} text-center min-w-[2.2rem]">
                           ${v}
                         </div>
-                        ${i < original.length - 1 ? '<span class="text-stone-500 font-bold">:</span>' : ''}
+                        ${i < original.length - 1 ? '<span class="text-slate-400 font-black">:</span>' : ''}
                       `;
                     }).join('')}
                   </div>
                 </div>
 
-                <!-- Compressed row -->
-                <div class="h-24 flex flex-col items-center justify-center">
+                <!-- Collapsing step -->
+                <div class="h-20 flex flex-col items-center justify-center">
                   ${step >= 1 ? `
-                    <div class="anim-pop w-full max-w-xl bg-stone-900/90 border border-brand-amber/40 rounded-2xl p-4 shadow-xl text-center">
-                      <span class="text-xs text-stone-400 block mb-2">Se comprime la secuencia de <strong class="text-brand-amber">5 hextetos en cero</strong>:</span>
-                      <div class="flex items-center justify-center gap-3 font-mono text-xl sm:text-3xl font-bold">
-                        <span class="px-3 py-1 bg-brand-terra rounded-lg text-white">2001</span>
-                        <span class="text-stone-500">:</span>
-                        <span class="px-3 py-1 bg-brand-terra rounded-lg text-white">db8</span>
-                        <span class="text-brand-amber">:</span>
-                        <span class="px-5 py-1 bg-brand-amber text-stone-950 font-black rounded-lg shadow-lg glow-amber anim-wipe">::</span>
-                        <span class="text-brand-amber">:</span>
-                        <span class="px-3 py-1 bg-brand-terra rounded-lg text-white">1</span>
+                    <div class="${getAnimClass('s3-step1', 'pop')} w-full max-w-xl bg-white border-2 border-pres-blue rounded-2xl p-3 sm:p-4 shadow-xl text-center">
+                      <span class="text-xs text-pres-muted font-bold block mb-1">Se colapsan los 5 hextetos nulos continuos en un solo <strong class="text-pres-blue font-mono font-black text-sm">::</strong></span>
+                      <div class="flex items-center justify-center gap-2 font-mono text-lg sm:text-2xl font-black mt-1">
+                        <span class="px-3 py-1 bg-pres-navy text-white rounded-lg">2001</span>
+                        <span class="text-slate-400">:</span>
+                        <span class="px-3 py-1 bg-pres-navy text-white rounded-lg">db8</span>
+                        <span class="px-4 py-1 bg-pres-blue text-white font-black rounded-lg shadow-md border-2 border-sky-300">::</span>
+                        <span class="px-3 py-1 bg-pres-navy text-white rounded-lg">1</span>
                       </div>
                     </div>
                   ` : ''}
                 </div>
 
-                <!-- Final Clean Output -->
+                <!-- Final Result -->
                 <div class="h-12 flex items-center justify-center">
                   ${step >= 2 ? `
-                    <div class="anim-wipe font-mono text-2xl sm:text-4xl font-black text-brand-amber tracking-wider bg-stone-950/80 px-8 py-2 rounded-2xl border-2 border-brand-amber shadow-2xl">
+                    <div class="${getAnimClass('s3-step2', 'wipe')} font-mono text-2xl sm:text-4xl font-black text-pres-navy tracking-wider bg-emerald-50 px-8 py-2 rounded-2xl border-4 border-pres-emerald shadow-xl">
                       2001:db8::1
                     </div>
                   ` : ''}
                 </div>
               </div>
 
-              <div class="text-xs text-stone-500 text-center">
-                El símbolo :: representa 16x5 = 80 bits contiguos en cero en esta dirección.
+              <div class="text-xs text-pres-muted text-center font-semibold">
+                En esta dirección, :: representa 80 bits contiguos en cero (5 hextetos × 16 bits).
               </div>
             </div>
           `;
@@ -375,65 +376,68 @@
       },
 
       // -------------------------------------------------------------
-      // SLIDE 4: Regla 3: Solo un :: por dirección
+      // SLIDE 4: Regla 3 - Únicamente un (::) por dirección
       // -------------------------------------------------------------
       {
         id: 'regla3',
-        bg: 'bg-[#220E07]',
         maxSteps: 2,
         render: (step) => `
           <div class="h-full flex flex-col justify-between">
             <div>
-              <span class="text-xs font-bold uppercase tracking-wider text-brand-amber">Regla 3</span>
-              <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Solo se permite UN '::' por dirección</h2>
-              <p class="text-sm text-brand-peach/70 mt-1">Usar más de un '::' genera ambigüedad al calcular el número de ceros faltantes.</p>
+              <span class="text-xs font-black uppercase tracking-wider text-pres-blue">Regla 3</span>
+              <h2 class="text-2xl sm:text-3xl font-black text-pres-navy">Límite Estricto: Un solo '::' por Dirección</h2>
+              <p class="text-sm font-medium text-pres-muted mt-0.5">Usar '::' más de una vez genera ambigüedad al reconstruir la dirección completa.</p>
             </div>
 
             <div class="my-auto space-y-4">
-              <!-- Target Address -->
-              <div class="text-center bg-stone-900/60 p-3 rounded-xl border border-stone-800">
-                <span class="text-xs text-stone-400 block uppercase tracking-wider">Dirección Original Completa</span>
-                <span class="font-mono text-lg sm:text-xl font-bold text-stone-200">2001 : 0000 : 0000 : 0001 : 0000 : 0000 : 0000 : 0001</span>
+              <!-- Address example -->
+              <div class="text-center bg-slate-100 p-2.5 rounded-xl border-2 border-slate-300">
+                <span class="text-[11px] text-pres-muted block uppercase tracking-wider font-extrabold">Dirección original completa</span>
+                <span class="font-mono text-sm sm:text-lg font-bold text-pres-navy">2001 : 0000 : 0000 : 0001 : 0000 : 0000 : 0000 : 0001</span>
               </div>
 
-              <!-- Comparison Cards Grid -->
+              <!-- Comparison cards grid -->
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 
-                <!-- Incorrect Option -->
-                <div class="el-transition ${step >= 1 ? 'el-visible anim-pop' : 'el-hidden'} bg-rose-950/40 border-2 border-rose-600/60 rounded-2xl p-4 text-center flex flex-col justify-between">
-                  <div>
-                    <span class="inline-block px-3 py-0.5 rounded-full bg-rose-600 text-white font-bold text-xs uppercase mb-2">
-                      ✕ Incorrecto
-                    </span>
-                    <div class="font-mono text-2xl font-black text-rose-300 my-2">
-                      2001<span class="text-rose-400 font-extrabold underline">::</span>1<span class="text-rose-400 font-extrabold underline">::</span>1
+                <!-- Incorrect option -->
+                <div class="h-36 ${step >= 1 ? `${getAnimClass('s4-inc', 'pop')} bg-red-50 border-2 border-pres-red` : 'border-2 border-dashed border-slate-300'} rounded-2xl p-4 text-center flex flex-col justify-between">
+                  ${step >= 1 ? `
+                    <div>
+                      <span class="inline-block px-3 py-0.5 rounded-full bg-pres-red text-white font-extrabold text-xs uppercase mb-1">
+                        ✕ Incorrecto
+                      </span>
+                      <div class="font-mono text-xl sm:text-2xl font-black text-red-900 my-1">
+                        2001<span class="text-pres-red underline font-black">::</span>1<span class="text-pres-red underline font-black">::</span>1
+                      </div>
                     </div>
-                  </div>
-                  <p class="text-xs text-rose-200/80 bg-rose-900/30 p-2 rounded-lg mt-2">
-                    Ambiguo: No se puede saber cuántos hextetos de cero corresponden a cada <span class="font-mono font-bold text-white">::</span>.
-                  </p>
+                    <p class="text-xs text-red-900 font-bold bg-red-100/80 p-2 rounded-lg">
+                      Ambiguo: Imposible determinar cuántos ceros hay en cada '::'.
+                    </p>
+                  ` : ''}
                 </div>
 
-                <!-- Correct Option -->
-                <div class="el-transition ${step >= 2 ? 'el-visible anim-pop' : 'el-hidden'} bg-emerald-950/40 border-2 border-emerald-500/60 rounded-2xl p-4 text-center flex flex-col justify-between">
-                  <div>
-                    <span class="inline-block px-3 py-0.5 rounded-full bg-emerald-600 text-white font-bold text-xs uppercase mb-2">
-                      ✓ Correcto
-                    </span>
-                    <div class="font-mono text-2xl font-black text-emerald-300 my-2">
-                      2001:0:0:1<span class="text-emerald-400 font-extrabold underline">::</span>1
+                <!-- Correct option -->
+                <div class="h-36 ${step >= 2 ? `${getAnimClass('s4-cor', 'pop')} bg-emerald-50 border-2 border-pres-emerald` : 'border-2 border-dashed border-slate-300'} rounded-2xl p-4 text-center flex flex-col justify-between">
+                  ${step >= 2 ? `
+                    <div>
+                      <span class="inline-block px-3 py-0.5 rounded-full bg-pres-emerald text-white font-extrabold text-xs uppercase mb-1">
+                        ✓ Correcto
+                      </span>
+                      <div class="font-mono text-xl sm:text-2xl font-black text-emerald-950 my-1">
+                        2001:0:0:1<span class="text-pres-emerald underline font-black">::</span>1
+                      </div>
                     </div>
-                  </div>
-                  <p class="text-xs text-emerald-200/80 bg-emerald-900/30 p-2 rounded-lg mt-2">
-                    Un solo <span class="font-mono font-bold text-white">::</span>. Es determinista: 8 - 4 hextetos visibles = 4 ceros representados.
-                  </p>
+                    <p class="text-xs text-emerald-900 font-bold bg-emerald-100/80 p-2 rounded-lg">
+                      Exacto: 8 hextetos totales - 4 visibles = 4 ceros representados por ::.
+                    </p>
+                  ` : ''}
                 </div>
 
               </div>
             </div>
 
-            <div class="text-xs text-stone-500 text-center">
-              Avanza para poner a prueba lo aprendido en el quiz interactivo.
+            <div class="text-xs text-pres-muted text-center font-semibold">
+              Avanza a la siguiente diapositiva para realizar el quiz de comprobación.
             </div>
           </div>
         `
@@ -444,51 +448,50 @@
       // -------------------------------------------------------------
       {
         id: 'quiz',
-        bg: 'bg-[#220E07]',
         maxSteps: 1,
         render: (step) => `
           <div class="h-full flex flex-col justify-between">
             <div>
-              <span class="text-xs font-bold uppercase tracking-wider text-brand-amber">Evaluación Rápida</span>
-              <h2 class="text-2xl sm:text-3xl font-extrabold text-white">¡Ponte a prueba!</h2>
-              <p class="text-sm text-brand-peach/70 mt-1">Selecciona la forma abreviada correcta para la siguiente dirección:</p>
+              <span class="text-xs font-black uppercase tracking-wider text-pres-blue">Comprobación de Conocimientos</span>
+              <h2 class="text-2xl sm:text-3xl font-black text-pres-navy">Ponte a Prueba</h2>
+              <p class="text-sm font-medium text-pres-muted mt-0.5">¿Cuál es la forma abreviada correcta y más compacta de esta dirección?</p>
             </div>
 
-            <div class="my-auto space-y-4">
+            <div class="my-auto space-y-3">
               <!-- Question Box -->
-              <div class="bg-stone-950 p-4 rounded-2xl border border-brand-amber/40 text-center shadow-lg">
-                <span class="text-xs text-stone-400 block mb-1">IPv6 Completa:</span>
-                <span class="font-mono text-sm sm:text-xl font-bold text-brand-amber tracking-wide break-all">
+              <div class="bg-blue-50 p-3.5 rounded-2xl border-2 border-pres-blue text-center shadow-md">
+                <span class="text-[11px] text-pres-navy block font-extrabold mb-0.5 uppercase tracking-wider">Dirección IPv6 completa:</span>
+                <span class="font-mono text-sm sm:text-xl font-black text-pres-navy tracking-wide break-all">
                   2001:0db8:0000:0000:0000:0000:0000:0001
                 </span>
               </div>
 
               <!-- Options Grid -->
-              <div class="grid grid-cols-1 gap-2.5">
-                <button onclick="checkQuiz(0, this)" class="quiz-opt w-full text-left p-3.5 rounded-xl bg-stone-800/90 hover:bg-stone-700/90 border border-stone-700/80 transition flex items-center justify-between group active:scale-[0.99]">
-                  <span class="font-mono text-sm sm:text-base text-stone-200 font-semibold group-hover:text-white">A) 2001:db8::0::1</span>
-                  <span class="opt-badge text-xs px-2.5 py-1 rounded-md font-bold opacity-0 transition"></span>
+              <div class="grid grid-cols-1 gap-2">
+                <button onclick="checkQuiz(0, this)" class="quiz-opt w-full text-left p-3 rounded-xl bg-white hover:bg-slate-100 border-2 border-slate-300 transition flex items-center justify-between group active:scale-[0.99] shadow-sm">
+                  <span class="font-mono text-xs sm:text-sm text-pres-navy font-extrabold">A) 2001:db8::0::1</span>
+                  <span class="opt-badge text-xs px-2.5 py-0.5 rounded font-extrabold opacity-0 transition"></span>
                 </button>
 
-                <button onclick="checkQuiz(1, this)" class="quiz-opt w-full text-left p-3.5 rounded-xl bg-stone-800/90 hover:bg-stone-700/90 border border-stone-700/80 transition flex items-center justify-between group active:scale-[0.99]">
-                  <span class="font-mono text-sm sm:text-base text-stone-200 font-semibold group-hover:text-white">B) 2001:db8::1</span>
-                  <span class="opt-badge text-xs px-2.5 py-1 rounded-md font-bold opacity-0 transition"></span>
+                <button onclick="checkQuiz(1, this)" class="quiz-opt w-full text-left p-3 rounded-xl bg-white hover:bg-slate-100 border-2 border-slate-300 transition flex items-center justify-between group active:scale-[0.99] shadow-sm">
+                  <span class="font-mono text-xs sm:text-sm text-pres-navy font-extrabold">B) 2001:db8::1</span>
+                  <span class="opt-badge text-xs px-2.5 py-0.5 rounded font-extrabold opacity-0 transition"></span>
                 </button>
 
-                <button onclick="checkQuiz(2, this)" class="quiz-opt w-full text-left p-3.5 rounded-xl bg-stone-800/90 hover:bg-stone-700/90 border border-stone-700/80 transition flex items-center justify-between group active:scale-[0.99]">
-                  <span class="font-mono text-sm sm:text-base text-stone-200 font-semibold group-hover:text-white">C) 2001:db:0:0:0:0:0:1</span>
-                  <span class="opt-badge text-xs px-2.5 py-1 rounded-md font-bold opacity-0 transition"></span>
+                <button onclick="checkQuiz(2, this)" class="quiz-opt w-full text-left p-3 rounded-xl bg-white hover:bg-slate-100 border-2 border-slate-300 transition flex items-center justify-between group active:scale-[0.99] shadow-sm">
+                  <span class="font-mono text-xs sm:text-sm text-pres-navy font-extrabold">C) 2001:db:0:0:0:0:0:1</span>
+                  <span class="opt-badge text-xs px-2.5 py-0.5 rounded font-extrabold opacity-0 transition"></span>
                 </button>
               </div>
 
               <!-- Feedback Box -->
-              <div id="quiz-feedback" class="h-16 flex items-center justify-center">
-                <span class="text-xs text-stone-500 italic">Haz clic en una opción para ver la retroalimentación.</span>
+              <div id="quiz-feedback" class="h-14 flex items-center justify-center">
+                <span class="text-xs text-pres-muted font-bold italic">Selecciona una opción para validar la respuesta.</span>
               </div>
             </div>
 
-            <div class="text-xs text-stone-500 text-center">
-              Usa los principios de omisión de ceros y compresión única con ::
+            <div class="text-xs text-pres-muted text-center font-semibold">
+              Aplica las 3 reglas aprendidas durante la lección.
             </div>
           </div>
         `
@@ -499,56 +502,58 @@
       // -------------------------------------------------------------
       {
         id: 'resumen',
-        bg: 'bg-brand-dark',
         maxSteps: 4,
         render: (step) => {
           const rules = [
-            { title: 'Quita ceros a la izquierda', desc: '0db8 → db8, 0000 → 0', req: 1 },
-            { title: 'Comprime ceros continuos con ::', desc: 'Reemplaza bloques de ceros por un único ::', req: 2 },
-            { title: 'Usa :: una sola vez', desc: 'Evita la ambigüedad en la dirección', req: 3 }
+            { title: 'Quita ceros a la izquierda', desc: '0db8 → db8 · 0000 → 0', req: 1, id: 'r1' },
+            { title: 'Comprime bloques de ceros con ::', desc: 'Sustituye la secuencia más larga de hextetos nulos', req: 2, id: 'r2' },
+            { title: 'Usa :: sólo una vez', desc: 'Evita ambigüedades en el cálculo de hextetos faltantes', req: 3, id: 'r3' }
           ];
 
           return `
             <div class="h-full flex flex-col justify-between">
               <div class="flex items-center justify-between">
                 <div>
-                  <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Resumen de Reglas</h2>
-                  <p class="text-sm text-brand-peach/70 mt-0.5">Sintaxis y compresión de direcciones IPv6</p>
+                  <h2 class="text-2xl sm:text-3xl font-black text-pres-navy">Resumen de Reglas</h2>
+                  <p class="text-sm font-medium text-pres-muted mt-0.5">Síntesis para acortar direcciones IPv6</p>
                 </div>
-                <button onclick="goToSlide(5)" class="text-xs text-brand-amber hover:underline font-bold bg-brand-amber/10 px-3 py-1.5 rounded-lg border border-brand-amber/30">
-                  ↺ Repetir Quiz
+                <button onclick="goToSlide(5)" class="text-xs font-bold text-pres-blue hover:underline bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-200">
+                  ↺ Reintentar Quiz
                 </button>
               </div>
 
-              <div class="my-auto space-y-3">
+              <div class="my-auto space-y-2.5">
                 ${rules.map((r, i) => {
                   const visible = step >= r.req;
+                  if (!visible) return `<div class="h-14 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50"></div>`;
+
+                  const animCls = getAnimClass(`s6-${r.id}`, 'pop');
                   return `
-                    <div class="el-transition ${visible ? 'el-visible anim-pop' : 'el-hidden'} flex items-center gap-4 bg-brand-card/90 p-3.5 rounded-2xl border border-stone-700/60">
-                      <div class="w-10 h-10 rounded-xl bg-brand-amber text-stone-950 font-black text-xl flex items-center justify-center shrink-0 shadow-md">
+                    <div class="${animCls} flex items-center gap-3 bg-white p-3 rounded-2xl border-2 border-slate-200 shadow-md">
+                      <div class="w-9 h-9 rounded-xl bg-pres-blue text-white font-black text-lg flex items-center justify-center shrink-0">
                         ${i + 1}
                       </div>
                       <div>
-                        <h3 class="font-bold text-white text-base">${r.title}</h3>
-                        <p class="text-xs text-brand-peach/70">${r.desc}</p>
+                        <h3 class="font-extrabold text-pres-navy text-sm sm:text-base">${r.title}</h3>
+                        <p class="text-xs font-semibold text-pres-muted">${r.desc}</p>
                       </div>
                     </div>
                   `;
                 }).join('')}
 
-                <!-- Final Compressed Address Showcase -->
+                <!-- Final Address Card -->
                 <div class="h-20 flex items-center justify-center pt-2">
                   ${step >= 4 ? `
-                    <div class="anim-wipe w-full bg-stone-950 p-3 rounded-2xl border-2 border-brand-amber text-center shadow-2xl glow-amber">
-                      <span class="text-[10px] text-stone-400 uppercase tracking-widest block font-semibold">Resultado Final Simplificado</span>
-                      <span class="font-mono text-2xl sm:text-3xl font-black text-brand-amber">2001:db8::1</span>
+                    <div class="${getAnimClass('s6-final', 'wipe')} w-full bg-pres-navy p-3 rounded-2xl border-2 border-pres-blue text-center shadow-2xl">
+                      <span class="text-[10px] text-sky-200 uppercase tracking-widest block font-extrabold">Resultado Final Abreviado</span>
+                      <span class="font-mono text-2xl sm:text-3xl font-black text-white">2001:db8::1</span>
                     </div>
                   ` : ''}
                 </div>
               </div>
 
-              <div class="text-xs text-stone-500 text-center">
-                ¡Has completado la presentación de la lección!
+              <div class="text-xs text-pres-muted text-center font-semibold">
+                ¡Presentación completada con éxito!
               </div>
             </div>
           `;
@@ -556,11 +561,9 @@
       }
     ];
 
-    // Presentation Logic State
     let currentSlide = 0;
     let currentStep = 0;
 
-    // DOM Elements
     const slideContent = document.getElementById('slide-content');
     const slideNum = document.getElementById('slide-num');
     const slideTotal = document.getElementById('slide-total');
@@ -577,24 +580,27 @@
 
     function renderDots() {
       slideDots.innerHTML = slides.map((_, i) => `
-        <button onclick="goToSlide(${i})" class="w-2.5 h-2.5 rounded-full transition-all ${i === currentSlide ? 'bg-brand-amber w-6' : 'bg-stone-700 hover:bg-stone-500'}" title="Ir a diapositiva ${i + 1}"></button>
+        <button onclick="goToSlide(${i})" class="w-2.5 h-2.5 rounded-full transition-all ${i === currentSlide ? 'bg-pres-blue w-6' : 'bg-slate-600 hover:bg-slate-400'}" title="Diapositiva ${i + 1}"></button>
       `).join('');
     }
 
     function renderSlide() {
       const slide = slides[currentSlide];
+      
+      // Render layout content using tracker checks
       slideContent.innerHTML = slide.render(currentStep);
       slideNum.textContent = currentSlide + 1;
 
-      // Update Navigation Buttons State
+      // Disable/enable Previous button
       btnPrev.disabled = (currentSlide === 0 && currentStep === 0);
       btnPrev.classList.toggle('opacity-40', btnPrev.disabled);
       btnPrev.classList.toggle('cursor-not-allowed', btnPrev.disabled);
 
+      // Label Next button
       const isLast = (currentSlide === slides.length - 1) && (currentStep === slide.maxSteps);
       btnNext.textContent = isLast ? 'Finalizar' : 'Siguiente';
-      btnNext.classList.toggle('bg-brand-terra', !isLast);
-      btnNext.classList.toggle('bg-emerald-600', isLast);
+      btnNext.classList.toggle('bg-pres-blue', !isLast);
+      btnNext.classList.toggle('bg-pres-emerald', isLast);
 
       renderDots();
     }
@@ -634,9 +640,9 @@
       const opts = document.querySelectorAll('.quiz-opt');
       const feedback = document.getElementById('quiz-feedback');
 
-      // Reset styles
+      // Reset options formatting
       opts.forEach(el => {
-        el.className = 'quiz-opt w-full text-left p-3.5 rounded-xl bg-stone-800/90 border border-stone-700/80 transition flex items-center justify-between group active:scale-[0.99]';
+        el.className = 'quiz-opt w-full text-left p-3 rounded-xl bg-white border-2 border-slate-300 transition flex items-center justify-between group active:scale-[0.99] shadow-sm';
         const badge = el.querySelector('.opt-badge');
         badge.classList.add('opacity-0');
       });
@@ -644,36 +650,41 @@
       const badge = btnElement.querySelector('.opt-badge');
 
       if (index === 1) { // Option B is CORRECT
-        btnElement.classList.remove('bg-stone-800/90', 'border-stone-700/80');
-        btnElement.classList.add('bg-emerald-950/80', 'border-emerald-500', 'anim-success');
+        btnElement.className = 'quiz-opt w-full text-left p-3 rounded-xl bg-emerald-50 border-2 border-pres-emerald transition flex items-center justify-between group active:scale-[0.99] shadow-md';
         badge.textContent = '¡Correcto!';
-        badge.className = 'opt-badge text-xs px-2.5 py-1 rounded-md font-bold bg-emerald-500 text-slate-950 opacity-100';
+        badge.className = 'opt-badge text-xs px-2.5 py-0.5 rounded font-black bg-pres-emerald text-white opacity-100';
+
+        if (typeof confetti === 'function') {
+          confetti({
+            particleCount: 50,
+            spread: 60,
+            origin: { y: 0.75 }
+          });
+        }
 
         feedback.innerHTML = `
-          <div class="anim-pop bg-emerald-900/40 border border-emerald-500/50 rounded-xl p-2.5 text-center text-xs text-emerald-200">
-            <strong>✓ ¡Excelente!</strong> Omitió los ceros a la izquierda (<span class="font-mono">0db8→db8</span>) y comprimió los 5 hextetos en cero consecutivos en un solo <span class="font-mono font-bold">::</span>.
+          <div class="bg-emerald-100 border border-pres-emerald rounded-xl p-2 text-center text-xs text-emerald-950 font-bold">
+            <strong>✓ Correcto:</strong> Elimina ceros iniciales (<span class="font-mono">0db8→db8</span>) y comprime la cadena de ceros contiguos en <span class="font-mono font-black text-pres-emerald">::</span>.
           </div>
         `;
-      } else { // Option A or C are INCORRECT
-        btnElement.classList.remove('bg-stone-800/90', 'border-stone-700/80');
-        btnElement.classList.add('bg-rose-950/80', 'border-rose-500', 'anim-shake');
+      } else { // Incorrect Option
+        btnElement.className = 'quiz-opt w-full text-left p-3 rounded-xl bg-red-50 border-2 border-pres-red anim-shake transition flex items-center justify-between group active:scale-[0.99] shadow-md';
         badge.textContent = 'Incorrecto';
-        badge.className = 'opt-badge text-xs px-2.5 py-1 rounded-md font-bold bg-rose-500 text-white opacity-100';
+        badge.className = 'opt-badge text-xs px-2.5 py-0.5 rounded font-black bg-pres-red text-white opacity-100';
 
         const reason = index === 0 
-          ? 'No puedes colocar dos veces el símbolo :: en una misma dirección.'
-          : 'Falta comprimir la secuencia de ceros consecutivos con ::';
+          ? 'Regla 3 violada: No se permite usar :: dos veces en una misma dirección.'
+          : 'Regla 2 violada: No se comprimieron los hextetos en cero consecutivos.';
 
         feedback.innerHTML = `
-          <div class="anim-pop bg-rose-900/40 border border-rose-500/50 rounded-xl p-2.5 text-center text-xs text-rose-200">
-            <strong>✕ Incorrecto:</strong> ${reason}
+          <div class="bg-red-100 border border-pres-red rounded-xl p-2 text-center text-xs text-red-950 font-bold">
+            <strong>✕ Respuesta Incorrecta:</strong> ${reason}
           </div>
         `;
       }
     }
 
     function setupEventListeners() {
-      // Keyboard Navigation
       document.addEventListener('keydown', (e) => {
         if (['ArrowRight', 'Space', 'Enter', 'PageDown'].includes(e.code)) {
           e.preventDefault();
@@ -684,7 +695,6 @@
         }
       });
 
-      // Stage Click to advance (excluding buttons)
       document.getElementById('slide-content').addEventListener('click', (e) => {
         if (!e.target.closest('button') && !e.target.closest('.quiz-opt')) {
           nextStep();
@@ -692,7 +702,6 @@
       });
     }
 
-    // Launch Application
     window.onload = init;
   </script>
 </body>
