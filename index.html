@@ -1,115 +1,699 @@
-
-Ipv6 vista previa · HTML
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="h-full bg-stone-900 select-none">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>IPv6 – Vista previa de la presentación</title>
-<style>
-  html,body{margin:0;height:100%;background:#2a120b;overflow:hidden;font-family:Calibri,Carlito,Arial,sans-serif}
-  #stage{position:absolute;left:50%;top:50%;width:960px;height:540px;transform-origin:center;overflow:hidden;box-shadow:0 8px 40px #000a}
-  .slide{position:absolute;inset:0;display:none}
-  .slide.on{display:block}
-  .el{position:absolute;box-sizing:border-box;display:flex;align-items:center;transition:opacity .5s,clip-path .5s;white-space:pre-line;line-height:1.15}
-  .el.hide{opacity:0}
-  .el.wipe.hide{clip-path:inset(0 100% 0 0);opacity:1}
-  .el.wipe{clip-path:inset(0 0 0 0)}
-  .el.link{cursor:pointer}
-  .el.link:hover{filter:brightness(1.08);outline:3px solid #F4A62A}
-  #hud{position:fixed;bottom:8px;left:0;right:0;text-align:center;color:#fdd;font:13px Arial;opacity:.7}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reglas de Direccionamiento y Sintaxis IPv6</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@500;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#2A120B',
+              card: '#3A1A10',
+              terra: '#C8462B',
+              amber: '#F4A62A',
+              peach: '#FDE3C8',
+              bg: '#1C0A05',
+              wrong: '#E63946',
+              correct: '#2A9D8F'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"Fira Code"', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+    @keyframes pulseSuccess {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+      100% { transform: scale(1); }
+    }
+    @keyframes wipeIn {
+      from { clip-path: inset(0 100% 0 0); opacity: 0; }
+      to { clip-path: inset(0 0 0 0); opacity: 1; }
+    }
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.85) translateY(12px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .anim-shake { animation: shake 0.4s ease-in-out; }
+    .anim-pop { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+    .anim-wipe { animation: wipeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .anim-success { animation: pulseSuccess 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+    .glow-amber { box-shadow: 0 0 25px rgba(244, 166, 42, 0.35); }
+    .glow-terra { box-shadow: 0 0 25px rgba(200, 70, 43, 0.35); }
+
+    /* Custom smooth transition states */
+    .el-transition {
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .el-hidden {
+      opacity: 0;
+      transform: translateY(16px) scale(0.96);
+      pointer-events: none;
+    }
+    .el-visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+  </style>
 </head>
-<body>
-<div id="stage"></div>
-<div id="hud">Clic / Espacio / → avanza · ← retrocede · en el quiz haz clic en una opción</div>
-<script>
-const DARK='#4A1D12',TERRA='#C8462B',AMBER='#F4A62A',PEACH='#FDE3C8',BG='#FFF5EA',INK='#3A1A10',RED='#D62828',WRONG='#B5301F',WHITE='#fff';
-const P=96, R=t=>`<span style="color:${RED};font-weight:700">${t}</span>`;
-// e(texto, x,y,w,h, opciones) — medidas en pulgadas como en el PPTX; s = clic en el que aparece (0 = fijo)
-const e=(t,x,y,w,h,o={})=>Object.assign({t,x,y,w,h},o);
-const title=(t,c)=>e(t,.6,.35,8.8,.9,{fs:36,b:1,c:c||DARK,f:'Cambria,Georgia,serif'});
-const box=(t,x,y,w,h,o={})=>e(t,x,y,w,h,Object.assign({bg:TERRA,c:WHITE,b:1,al:'center',r:.15},o));
- 
-const hx=['2001','0db8','0000','0000','0000','0000','0000','0001'];
-const opts=['A)  2001:db8::0::1','B)  2001:db8::1','C)  2001:db:0:0:0:0:0:1'];
-const slides=[
- {bg:DARK,els:[
-  e('Reglas de Direccionamiento y Sintaxis IPv6',.6,.9,8.8,1.9,{fs:40,b:1,c:WHITE,f:'Cambria,Georgia,serif'}),
-  e('Unidad 3 · Direccionamiento IPv6 y Protocolos TCP/IP · 3.3',.6,2.9,8.8,.8,{fs:20,c:PEACH}),
-  e('2001:db8::1',.6,3.9,8.8,1.1,{fs:60,b:1,c:AMBER,s:1,eff:'wipe'})]},
- {bg:BG,els:[title('Sintaxis: 8 hextetos'),
-  ...hx.map((v,i)=>box(v,.65+i*1.1,1.6,.95,.9,{fs:28,bg:i%2?TERRA:WRONG,s:1,d:i*200})),
-  e('4 dígitos hex = 16 bits · separados por ":"',.65,2.75,8.7,.5,{fs:20,al:'center',s:2}),
-  e('8 × 16 = 128 bits',.6,3.6,8.8,1.1,{fs:48,b:1,c:TERRA,al:'center',s:3,eff:'wipe'})]},
- {bg:BG,els:[title('Regla 1: ceros a la izquierda'),
-  e('Antes',1.65,1.4,2.8,.45,{fs:20,b:1,c:WRONG,al:'center'}),e('Después',5.55,1.4,2.8,.45,{fs:20,b:1,c:WRONG,al:'center'}),
-  ...[[R('0')+'db8','db8'],[R('000')+'0','0'],[R('000')+'1','1']].flatMap(([a,b],r)=>{const y=1.95+r*.8;return[
-   e(a,1.65,y,2.8,.65,{fs:28,bg:PEACH,r:.12,al:'center',s:r+1}),
-   e('→',4.45,y,1.1,.65,{fs:32,b:1,c:TERRA,al:'center',s:r+1,d:150}),
-   box(b,5.55,y,2.8,.65,{fs:28,s:r+1,d:300,eff:'wipe'})]}),
-  e('2001:db8:0:0:0:0:0:1',.6,4.4,8.8,.7,{fs:32,b:1,c:TERRA,al:'center',s:4,eff:'wipe'})]},
- {bg:BG,els:[title('Regla 2: compresión con ::'),
-  ...['2001','db8','0','0','0','0','0','1'].map((v,i)=>box(v,.65+i*1.1,1.5,.95,.85,{fs:28,bg:(i>1&&i<7)?AMBER:TERRA,c:(i>1&&i<7)?INK:WHITE})),
-  box('2001',.65,2.85,.95,.85,{fs:28,s:1}),box('db8',1.75,2.85,.95,.85,{fs:28,s:1,d:150}),
-  box('::',2.85,2.85,5.35,.85,{fs:36,bg:AMBER,c:INK,s:1,d:300,eff:'wipe'}),box('1',8.35,2.85,.95,.85,{fs:28,s:1,d:450}),
-  e('5 hextetos en cero → ::',2.85,3.75,5.35,.4,{fs:20,al:'center',s:1,d:600}),
-  e('2001:db8::1',.6,4.3,8.8,.85,{fs:48,b:1,c:TERRA,al:'center',s:2,eff:'wipe'})]},
- {bg:BG,els:[title('Solo un :: por dirección'),
-  e('Dirección: 2001:0:0:1:0:0:0:1',.6,1.4,8.8,.5,{fs:24}),
-  e('INCORRECTO\n<b style="font-size:32pt">2001::1::1</b>\n¿Cuántos ceros va en cada ::?',.6,2.1,4.2,2.7,{fs:20,bg:WRONG,c:WHITE,r:.15,al:'center',col:1,s:1,eff:'wipe',html:1}),
-  e('CORRECTO\n<b style="font-size:32pt">2001:0:0:1::1</b>\nUn solo ::, sin ambigüedad',5.2,2.1,4.2,2.7,{fs:20,bg:AMBER,c:INK,r:.15,al:'center',col:1,s:2,eff:'wipe',html:1})]},
- {bg:BG,els:[title('Ponte a prueba'),
-  e('2001:0db8:0000:0000:0000:0000:0000:0001',.6,1.3,8.8,.6,{fs:28,b:1,c:TERRA}),
-  e('¿Cuál es su forma abreviada correcta?',.6,1.95,8.8,.45,{fs:20}),
-  ...opts.map((t,i)=>e(t,.6,2.6+i*.85,8.8,.7,{fs:28,bg:PEACH,r:.15,pad:.3,s:1,d:i*200,link:i==1?6:4}))]},
- {bg:DARK,els:[title('Resumen',WHITE),
-  e('Repetir quiz',7.4,.45,2,.4,{fs:16,c:AMBER,al:'right',u:1,link:5}),
-  ...['Quita ceros a la izquierda','Comprime ceros con ::','Usa :: solo una vez'].flatMap((t,i)=>[
-   box(String(i+1),.6,1.5+i*.9,.7,.7,{fs:28,bg:AMBER,c:INK,r:.35,s:i+1}),
-   e(t,1.55,1.5+i*.9,7.8,.7,{fs:28,c:WHITE,s:i+1,d:150,eff:'wipe'})]),
-  e('2001:db8::1',.6,4.25,8.8,.9,{fs:48,b:1,c:AMBER,al:'center',s:4,eff:'wipe'})]}
-];
- 
-const stage=document.getElementById('stage');
-const maxStep=slides.map(s=>Math.max(0,...s.els.map(x=>x.s||0)));
-let cur=0,step=0;
-slides.forEach((sl,si)=>{
-  const d=document.createElement('div');d.className='slide';d.style.background=sl.bg;
-  sl.els.forEach(o=>{
-    const n=document.createElement('div');
-    n.className='el'+(o.eff==='wipe'?' wipe':'')+(o.link!=null?' link':'')+(o.s?' hide':'');
-    Object.assign(n.style,{left:o.x*P+'px',top:o.y*P+'px',width:o.w*P+'px',height:o.h*P+'px',
-      fontSize:(o.fs||28)*4/3+'px',color:o.c||INK,fontWeight:o.b?700:400,
-      fontFamily:o.f||'',background:o.bg||'none',borderRadius:o.r?o.r*P+'px':'0',
-      justifyContent:o.al==='center'?'center':o.al==='right'?'flex-end':'flex-start',
-      textAlign:o.al||'left',padding:(o.pad?o.pad*P:5)+'px',
-      textDecoration:o.u?'underline':'none',transitionDelay:(o.d||0)+'ms'});
-    if(o.col){n.style.flexDirection='column';n.style.justifyContent='center'}
-    if(o.html)n.innerHTML=o.t.replace(/\n/g,'<br>');else n.innerHTML=o.t;
-    if(o.s)n.dataset.s=o.s;
-    if(o.link!=null)n.onclick=ev=>{ev.stopPropagation();go(o.link)};
-    d.appendChild(n);
-  });
-  stage.appendChild(d);
-});
-function render(){
-  [...stage.children].forEach((d,i)=>{
-    d.classList.toggle('on',i===cur);
-    if(i===cur)d.querySelectorAll('[data-s]').forEach(n=>n.classList.toggle('hide',+n.dataset.s>step));
-  });
-}
-function go(i){cur=Math.max(0,Math.min(slides.length-1,i));step=0;render()}
-function next(){ if(step<maxStep[cur])step++; else if(cur<slides.length-1){cur++;step=0} render() }
-function prev(){ if(step>0)step--; else if(cur>0){cur--;step=maxStep[cur]} render() }
-document.addEventListener('click',next);
-document.addEventListener('keydown',k=>{
-  if(['ArrowRight','ArrowDown',' ','Enter','PageDown'].includes(k.key)){k.preventDefault();next()}
-  if(['ArrowLeft','ArrowUp','PageUp','Backspace'].includes(k.key)){k.preventDefault();prev()}
-});
-function fit(){const s=Math.min(innerWidth/960,(innerHeight-24)/540);stage.style.transform=`translate(-50%,-50%) scale(${s})`}
-addEventListener('resize',fit);fit();render();
-</script>
+<body class="h-full flex flex-col items-center justify-center p-2 sm:p-4 text-stone-100 overflow-hidden font-sans bg-[#1A0A06]">
+
+  <!-- Top Navigation & Progress Bar -->
+  <header class="w-full max-w-[960px] mb-3 flex items-center justify-between px-2 text-xs sm:text-sm">
+    <div class="flex items-center gap-2">
+      <span class="w-2.5 h-2.5 rounded-full bg-brand-amber animate-ping"></span>
+      <span class="font-bold tracking-wide text-brand-peach uppercase text-xs">Unidad 3 · 3.3 IPv6</span>
+    </div>
+
+    <!-- Slide progress dots -->
+    <div id="slide-dots" class="flex gap-1.5 sm:gap-2"></div>
+
+    <div class="text-stone-400 font-mono text-xs">
+      <span id="slide-num" class="text-brand-amber font-bold">1</span> / <span id="slide-total">7</span>
+    </div>
+  </header>
+
+  <!-- Main 16:9 Presentation Canvas Container -->
+  <main class="relative w-full max-w-[960px] aspect-[16/9] bg-brand-dark rounded-2xl shadow-2xl overflow-hidden border border-amber-900/40 flex flex-col justify-between p-6 sm:p-10 select-none">
+    
+    <!-- Background Decorative Gradients -->
+    <div class="absolute -top-24 -left-24 w-72 h-72 bg-brand-terra/20 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-24 -right-24 w-80 h-80 bg-brand-amber/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <!-- Dynamic Slide Content Area -->
+    <div id="slide-content" class="relative w-full h-full flex flex-col justify-between z-10">
+      <!-- Injected via JS -->
+    </div>
+
+  </main>
+
+  <!-- Bottom Interactive Controls & HUD -->
+  <footer class="w-full max-w-[960px] mt-4 flex flex-col sm:flex-row items-center justify-between gap-3 px-2">
+    <div class="text-xs text-stone-400 hidden sm:flex items-center gap-3">
+      <span class="bg-stone-800/80 px-2 py-1 rounded border border-stone-700/50 font-mono text-[11px] text-stone-300">Space / ← →</span>
+      <span>Navegar pasos</span>
+      <span class="text-stone-600">|</span>
+      <span class="bg-stone-800/80 px-2 py-1 rounded border border-stone-700/50 font-mono text-[11px] text-stone-300">Clic</span>
+      <span>Avanzar</span>
+    </div>
+
+    <!-- Navigation Action Buttons -->
+    <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+      <button id="btn-prev" onclick="prevStep()" class="px-4 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 active:scale-95 text-stone-200 text-sm font-semibold transition border border-stone-700/50 flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        Anterior
+      </button>
+
+      <button id="btn-restart" onclick="goToSlide(0)" class="p-2 rounded-xl bg-stone-800/80 hover:bg-stone-700 text-stone-400 hover:text-stone-200 transition border border-stone-700/50" title="Reiniciar presentación">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+      </button>
+
+      <button id="btn-next" onclick="nextStep()" class="px-5 py-2 rounded-xl bg-brand-terra hover:bg-orange-600 active:scale-95 text-white text-sm font-bold shadow-lg shadow-brand-terra/30 transition flex items-center gap-2">
+        Siguiente
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </footer>
+
+  <script>
+    // Colors & Design Tokens
+    const RED_HIGHLIGHT = '#F87171';
+    
+    const slides = [
+      // -------------------------------------------------------------
+      // SLIDE 0: Portada
+      // -------------------------------------------------------------
+      {
+        id: 'portada',
+        bg: 'bg-brand-dark',
+        maxSteps: 1,
+        render: (step) => `
+          <div class="h-full flex flex-col justify-center items-center text-center px-4">
+            <span class="inline-block px-3 py-1 mb-4 text-xs font-bold tracking-widest text-brand-amber bg-brand-amber/10 border border-brand-amber/30 rounded-full uppercase">
+              Lección Interactiva
+            </span>
+            <h1 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight mb-4 max-w-2xl">
+              Reglas de Direccionamiento y Sintaxis IPv6
+            </h1>
+            <p class="text-base sm:text-xl text-brand-peach/80 font-medium max-w-xl mb-8">
+              Unidad 3 · Direccionamiento IPv6 y Protocolos TCP/IP · 3.3
+            </p>
+            
+            <div class="h-20 flex items-center justify-center">
+              ${step >= 1 ? `
+                <div class="anim-wipe bg-stone-900/90 border border-brand-amber/50 rounded-2xl px-6 py-3 shadow-xl glow-amber">
+                  <span class="font-mono text-2xl sm:text-4xl font-bold text-brand-amber tracking-wider">
+                    2001:db8::1
+                  </span>
+                </div>
+              ` : `
+                <span class="text-xs text-stone-500 animate-pulse">Presiona 'Siguiente' o haz clic para revelar el formato resumido</span>
+              `}
+            </div>
+          </div>
+        `
+      },
+
+      // -------------------------------------------------------------
+      // SLIDE 1: Sintaxis: 8 hextetos
+      // -------------------------------------------------------------
+      {
+        id: 'hextetos',
+        bg: 'bg-[#220E07]',
+        maxSteps: 3,
+        render: (step) => {
+          const hextets = ['2001','0db8','0000','0000','0000','0000','0000','0001'];
+          return `
+            <div class="h-full flex flex-col justify-between">
+              <div>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Sintaxis: 8 hextetos</h2>
+                <p class="text-sm text-brand-peach/70 mt-1">Estructura completa de una dirección IPv6 sin comprimir</p>
+              </div>
+
+              <!-- Hextets Grid -->
+              <div class="my-auto py-4">
+                <div class="grid grid-cols-4 sm:grid-cols-8 gap-2 sm:gap-2.5">
+                  ${hextets.map((v, i) => {
+                    const visible = step >= 1;
+                    const isEven = i % 2 === 0;
+                    const bgClass = isEven ? 'bg-brand-terra' : 'bg-rose-900/80';
+                    return `
+                      <div class="el-transition ${visible ? 'el-visible anim-pop' : 'el-hidden'} ${bgClass} p-3 rounded-xl border border-white/10 text-center shadow-lg group hover:scale-105 hover:border-brand-amber transition cursor-pointer" style="animation-delay: ${i * 60}ms">
+                        <span class="block font-mono text-base sm:text-xl font-bold text-white group-hover:text-brand-amber transition">${v}</span>
+                        <span class="block text-[9px] text-stone-300 font-mono mt-0.5">H${i+1}</span>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+
+                <div class="mt-6 text-center space-y-2">
+                  ${step >= 2 ? `
+                    <div class="anim-pop inline-block px-4 py-1.5 rounded-lg bg-stone-900/80 border border-stone-700 text-stone-300 font-mono text-sm sm:text-base">
+                      4 dígitos hexadecimales = <span class="text-brand-amber font-bold">16 bits</span> por hexteto
+                    </div>
+                  ` : ''}
+
+                  ${step >= 3 ? `
+                    <div class="anim-wipe block text-center mt-3">
+                      <span class="inline-block px-6 py-2 rounded-xl bg-brand-terra font-mono text-2xl sm:text-3xl font-extrabold text-white shadow-lg glow-terra">
+                        8 × 16 = <span class="text-brand-amber">128 bits</span> totales
+                      </span>
+                    </div>
+                  ` : ''}
+                </div>
+              </div>
+
+              <div class="text-xs text-stone-500 text-center">
+                Cada hexteto está separado por dos puntos (:)
+              </div>
+            </div>
+          `;
+        }
+      },
+
+      // -------------------------------------------------------------
+      // SLIDE 2: Regla 1: Ceros a la izquierda
+      // -------------------------------------------------------------
+      {
+        id: 'regla1',
+        bg: 'bg-[#220E07]',
+        maxSteps: 4,
+        render: (step) => {
+          const rows = [
+            { before: `<span class="text-rose-400 font-bold">0</span>db8`, after: 'db8', stepReq: 1 },
+            { before: `<span class="text-rose-400 font-bold">000</span>0`, after: '0', stepReq: 2 },
+            { before: `<span class="text-rose-400 font-bold">000</span>1`, after: '1', stepReq: 3 }
+          ];
+
+          return `
+            <div class="h-full flex flex-col justify-between">
+              <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-brand-amber">Regla 1</span>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Omisión de ceros a la izquierda</h2>
+                <p class="text-sm text-brand-peach/70 mt-1">Los ceros iniciales de cada hexteto se pueden omitir (los ceros finales NO).</p>
+              </div>
+
+              <!-- Transformations Table -->
+              <div class="my-auto space-y-3 max-w-2xl mx-auto w-full">
+                <div class="grid grid-cols-11 gap-2 text-xs uppercase tracking-wider text-stone-400 font-bold px-2 text-center">
+                  <div class="col-span-5">Forma Completa</div>
+                  <div class="col-span-1"></div>
+                  <div class="col-span-5">Forma Abreviada</div>
+                </div>
+
+                ${rows.map((r, idx) => {
+                  const visible = step >= r.stepReq;
+                  return `
+                    <div class="grid grid-cols-11 gap-2 items-center text-center">
+                      <!-- Before -->
+                      <div class="col-span-5 p-3 rounded-xl bg-brand-card/80 border border-stone-700/60 font-mono text-lg sm:text-xl font-semibold text-stone-200">
+                        ${r.before}
+                      </div>
+
+                      <!-- Arrow -->
+                      <div class="col-span-1 text-brand-amber text-xl font-bold flex justify-center">
+                        ${visible ? `<span class="anim-pop">→</span>` : ''}
+                      </div>
+
+                      <!-- After -->
+                      <div class="col-span-5 p-3 rounded-xl ${visible ? 'bg-brand-terra font-bold text-white border-brand-amber/50 anim-wipe shadow-lg' : 'bg-stone-900/30 border border-stone-800 text-stone-600'} font-mono text-lg sm:text-xl border transition">
+                        ${visible ? r.after : '...'}
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+
+                <!-- Resulting IPv6 Address -->
+                <div class="pt-4 h-16 flex items-center justify-center">
+                  ${step >= 4 ? `
+                    <div class="anim-pop bg-stone-900 border-2 border-brand-amber/60 rounded-xl px-6 py-2 shadow-xl">
+                      <span class="text-xs text-brand-peach/60 block text-center uppercase tracking-wider font-semibold">Resultado de la Regla 1</span>
+                      <span class="font-mono text-xl sm:text-2xl font-bold text-brand-amber">2001:db8:0:0:0:0:0:1</span>
+                    </div>
+                  ` : ''}
+                </div>
+              </div>
+
+              <div class="text-xs text-stone-500 text-center">
+                Atención: 0000 pasa a ser simplemente 0 (un solo cero se mantiene).
+              </div>
+            </div>
+          `;
+        }
+      },
+
+      // -------------------------------------------------------------
+      // SLIDE 3: Regla 2: Compresión con ::
+      // -------------------------------------------------------------
+      {
+        id: 'regla2',
+        bg: 'bg-[#220E07]',
+        maxSteps: 2,
+        render: (step) => {
+          const original = ['2001','db8','0','0','0','0','0','1'];
+          return `
+            <div class="h-full flex flex-col justify-between">
+              <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-brand-amber">Regla 2</span>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Compresión con doble dos puntos (::)</h2>
+                <p class="text-sm text-brand-peach/70 mt-1">Una secuencia contigua de hextetos en cero se reemplaza por '::'.</p>
+              </div>
+
+              <div class="my-auto space-y-6">
+                <!-- Original row -->
+                <div>
+                  <span class="text-xs font-semibold text-stone-400 block mb-2 text-center">Dirección con Regla 1 aplicada:</span>
+                  <div class="flex justify-center items-center gap-1 sm:gap-2 font-mono">
+                    ${original.map((v, i) => {
+                      const isZero = i >= 2 && i <= 6;
+                      return `
+                        <div class="px-2.5 py-2 rounded-lg text-sm sm:text-lg font-bold border ${isZero ? 'bg-amber-500/20 border-brand-amber text-brand-amber' : 'bg-brand-card border-stone-700 text-stone-200'} text-center min-w-[2.5rem]">
+                          ${v}
+                        </div>
+                        ${i < original.length - 1 ? '<span class="text-stone-500 font-bold">:</span>' : ''}
+                      `;
+                    }).join('')}
+                  </div>
+                </div>
+
+                <!-- Compressed row -->
+                <div class="h-24 flex flex-col items-center justify-center">
+                  ${step >= 1 ? `
+                    <div class="anim-pop w-full max-w-xl bg-stone-900/90 border border-brand-amber/40 rounded-2xl p-4 shadow-xl text-center">
+                      <span class="text-xs text-stone-400 block mb-2">Se comprime la secuencia de <strong class="text-brand-amber">5 hextetos en cero</strong>:</span>
+                      <div class="flex items-center justify-center gap-3 font-mono text-xl sm:text-3xl font-bold">
+                        <span class="px-3 py-1 bg-brand-terra rounded-lg text-white">2001</span>
+                        <span class="text-stone-500">:</span>
+                        <span class="px-3 py-1 bg-brand-terra rounded-lg text-white">db8</span>
+                        <span class="text-brand-amber">:</span>
+                        <span class="px-5 py-1 bg-brand-amber text-stone-950 font-black rounded-lg shadow-lg glow-amber anim-wipe">::</span>
+                        <span class="text-brand-amber">:</span>
+                        <span class="px-3 py-1 bg-brand-terra rounded-lg text-white">1</span>
+                      </div>
+                    </div>
+                  ` : ''}
+                </div>
+
+                <!-- Final Clean Output -->
+                <div class="h-12 flex items-center justify-center">
+                  ${step >= 2 ? `
+                    <div class="anim-wipe font-mono text-2xl sm:text-4xl font-black text-brand-amber tracking-wider bg-stone-950/80 px-8 py-2 rounded-2xl border-2 border-brand-amber shadow-2xl">
+                      2001:db8::1
+                    </div>
+                  ` : ''}
+                </div>
+              </div>
+
+              <div class="text-xs text-stone-500 text-center">
+                El símbolo :: representa 16x5 = 80 bits contiguos en cero en esta dirección.
+              </div>
+            </div>
+          `;
+        }
+      },
+
+      // -------------------------------------------------------------
+      // SLIDE 4: Regla 3: Solo un :: por dirección
+      // -------------------------------------------------------------
+      {
+        id: 'regla3',
+        bg: 'bg-[#220E07]',
+        maxSteps: 2,
+        render: (step) => `
+          <div class="h-full flex flex-col justify-between">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-brand-amber">Regla 3</span>
+              <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Solo se permite UN '::' por dirección</h2>
+              <p class="text-sm text-brand-peach/70 mt-1">Usar más de un '::' genera ambigüedad al calcular el número de ceros faltantes.</p>
+            </div>
+
+            <div class="my-auto space-y-4">
+              <!-- Target Address -->
+              <div class="text-center bg-stone-900/60 p-3 rounded-xl border border-stone-800">
+                <span class="text-xs text-stone-400 block uppercase tracking-wider">Dirección Original Completa</span>
+                <span class="font-mono text-lg sm:text-xl font-bold text-stone-200">2001 : 0000 : 0000 : 0001 : 0000 : 0000 : 0000 : 0001</span>
+              </div>
+
+              <!-- Comparison Cards Grid -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                
+                <!-- Incorrect Option -->
+                <div class="el-transition ${step >= 1 ? 'el-visible anim-pop' : 'el-hidden'} bg-rose-950/40 border-2 border-rose-600/60 rounded-2xl p-4 text-center flex flex-col justify-between">
+                  <div>
+                    <span class="inline-block px-3 py-0.5 rounded-full bg-rose-600 text-white font-bold text-xs uppercase mb-2">
+                      ✕ Incorrecto
+                    </span>
+                    <div class="font-mono text-2xl font-black text-rose-300 my-2">
+                      2001<span class="text-rose-400 font-extrabold underline">::</span>1<span class="text-rose-400 font-extrabold underline">::</span>1
+                    </div>
+                  </div>
+                  <p class="text-xs text-rose-200/80 bg-rose-900/30 p-2 rounded-lg mt-2">
+                    Ambiguo: No se puede saber cuántos hextetos de cero corresponden a cada <span class="font-mono font-bold text-white">::</span>.
+                  </p>
+                </div>
+
+                <!-- Correct Option -->
+                <div class="el-transition ${step >= 2 ? 'el-visible anim-pop' : 'el-hidden'} bg-emerald-950/40 border-2 border-emerald-500/60 rounded-2xl p-4 text-center flex flex-col justify-between">
+                  <div>
+                    <span class="inline-block px-3 py-0.5 rounded-full bg-emerald-600 text-white font-bold text-xs uppercase mb-2">
+                      ✓ Correcto
+                    </span>
+                    <div class="font-mono text-2xl font-black text-emerald-300 my-2">
+                      2001:0:0:1<span class="text-emerald-400 font-extrabold underline">::</span>1
+                    </div>
+                  </div>
+                  <p class="text-xs text-emerald-200/80 bg-emerald-900/30 p-2 rounded-lg mt-2">
+                    Un solo <span class="font-mono font-bold text-white">::</span>. Es determinista: 8 - 4 hextetos visibles = 4 ceros representados.
+                  </p>
+                </div>
+
+              </div>
+            </div>
+
+            <div class="text-xs text-stone-500 text-center">
+              Avanza para poner a prueba lo aprendido en el quiz interactivo.
+            </div>
+          </div>
+        `
+      },
+
+      // -------------------------------------------------------------
+      // SLIDE 5: Quiz Interactivo
+      // -------------------------------------------------------------
+      {
+        id: 'quiz',
+        bg: 'bg-[#220E07]',
+        maxSteps: 1,
+        render: (step) => `
+          <div class="h-full flex flex-col justify-between">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-brand-amber">Evaluación Rápida</span>
+              <h2 class="text-2xl sm:text-3xl font-extrabold text-white">¡Ponte a prueba!</h2>
+              <p class="text-sm text-brand-peach/70 mt-1">Selecciona la forma abreviada correcta para la siguiente dirección:</p>
+            </div>
+
+            <div class="my-auto space-y-4">
+              <!-- Question Box -->
+              <div class="bg-stone-950 p-4 rounded-2xl border border-brand-amber/40 text-center shadow-lg">
+                <span class="text-xs text-stone-400 block mb-1">IPv6 Completa:</span>
+                <span class="font-mono text-sm sm:text-xl font-bold text-brand-amber tracking-wide break-all">
+                  2001:0db8:0000:0000:0000:0000:0000:0001
+                </span>
+              </div>
+
+              <!-- Options Grid -->
+              <div class="grid grid-cols-1 gap-2.5">
+                <button onclick="checkQuiz(0, this)" class="quiz-opt w-full text-left p-3.5 rounded-xl bg-stone-800/90 hover:bg-stone-700/90 border border-stone-700/80 transition flex items-center justify-between group active:scale-[0.99]">
+                  <span class="font-mono text-sm sm:text-base text-stone-200 font-semibold group-hover:text-white">A) 2001:db8::0::1</span>
+                  <span class="opt-badge text-xs px-2.5 py-1 rounded-md font-bold opacity-0 transition"></span>
+                </button>
+
+                <button onclick="checkQuiz(1, this)" class="quiz-opt w-full text-left p-3.5 rounded-xl bg-stone-800/90 hover:bg-stone-700/90 border border-stone-700/80 transition flex items-center justify-between group active:scale-[0.99]">
+                  <span class="font-mono text-sm sm:text-base text-stone-200 font-semibold group-hover:text-white">B) 2001:db8::1</span>
+                  <span class="opt-badge text-xs px-2.5 py-1 rounded-md font-bold opacity-0 transition"></span>
+                </button>
+
+                <button onclick="checkQuiz(2, this)" class="quiz-opt w-full text-left p-3.5 rounded-xl bg-stone-800/90 hover:bg-stone-700/90 border border-stone-700/80 transition flex items-center justify-between group active:scale-[0.99]">
+                  <span class="font-mono text-sm sm:text-base text-stone-200 font-semibold group-hover:text-white">C) 2001:db:0:0:0:0:0:1</span>
+                  <span class="opt-badge text-xs px-2.5 py-1 rounded-md font-bold opacity-0 transition"></span>
+                </button>
+              </div>
+
+              <!-- Feedback Box -->
+              <div id="quiz-feedback" class="h-16 flex items-center justify-center">
+                <span class="text-xs text-stone-500 italic">Haz clic en una opción para ver la retroalimentación.</span>
+              </div>
+            </div>
+
+            <div class="text-xs text-stone-500 text-center">
+              Usa los principios de omisión de ceros y compresión única con ::
+            </div>
+          </div>
+        `
+      },
+
+      // -------------------------------------------------------------
+      // SLIDE 6: Resumen Final
+      // -------------------------------------------------------------
+      {
+        id: 'resumen',
+        bg: 'bg-brand-dark',
+        maxSteps: 4,
+        render: (step) => {
+          const rules = [
+            { title: 'Quita ceros a la izquierda', desc: '0db8 → db8, 0000 → 0', req: 1 },
+            { title: 'Comprime ceros continuos con ::', desc: 'Reemplaza bloques de ceros por un único ::', req: 2 },
+            { title: 'Usa :: una sola vez', desc: 'Evita la ambigüedad en la dirección', req: 3 }
+          ];
+
+          return `
+            <div class="h-full flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Resumen de Reglas</h2>
+                  <p class="text-sm text-brand-peach/70 mt-0.5">Sintaxis y compresión de direcciones IPv6</p>
+                </div>
+                <button onclick="goToSlide(5)" class="text-xs text-brand-amber hover:underline font-bold bg-brand-amber/10 px-3 py-1.5 rounded-lg border border-brand-amber/30">
+                  ↺ Repetir Quiz
+                </button>
+              </div>
+
+              <div class="my-auto space-y-3">
+                ${rules.map((r, i) => {
+                  const visible = step >= r.req;
+                  return `
+                    <div class="el-transition ${visible ? 'el-visible anim-pop' : 'el-hidden'} flex items-center gap-4 bg-brand-card/90 p-3.5 rounded-2xl border border-stone-700/60">
+                      <div class="w-10 h-10 rounded-xl bg-brand-amber text-stone-950 font-black text-xl flex items-center justify-center shrink-0 shadow-md">
+                        ${i + 1}
+                      </div>
+                      <div>
+                        <h3 class="font-bold text-white text-base">${r.title}</h3>
+                        <p class="text-xs text-brand-peach/70">${r.desc}</p>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+
+                <!-- Final Compressed Address Showcase -->
+                <div class="h-20 flex items-center justify-center pt-2">
+                  ${step >= 4 ? `
+                    <div class="anim-wipe w-full bg-stone-950 p-3 rounded-2xl border-2 border-brand-amber text-center shadow-2xl glow-amber">
+                      <span class="text-[10px] text-stone-400 uppercase tracking-widest block font-semibold">Resultado Final Simplificado</span>
+                      <span class="font-mono text-2xl sm:text-3xl font-black text-brand-amber">2001:db8::1</span>
+                    </div>
+                  ` : ''}
+                </div>
+              </div>
+
+              <div class="text-xs text-stone-500 text-center">
+                ¡Has completado la presentación de la lección!
+              </div>
+            </div>
+          `;
+        }
+      }
+    ];
+
+    // Presentation Logic State
+    let currentSlide = 0;
+    let currentStep = 0;
+
+    // DOM Elements
+    const slideContent = document.getElementById('slide-content');
+    const slideNum = document.getElementById('slide-num');
+    const slideTotal = document.getElementById('slide-total');
+    const slideDots = document.getElementById('slide-dots');
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+
+    function init() {
+      slideTotal.textContent = slides.length;
+      renderDots();
+      renderSlide();
+      setupEventListeners();
+    }
+
+    function renderDots() {
+      slideDots.innerHTML = slides.map((_, i) => `
+        <button onclick="goToSlide(${i})" class="w-2.5 h-2.5 rounded-full transition-all ${i === currentSlide ? 'bg-brand-amber w-6' : 'bg-stone-700 hover:bg-stone-500'}" title="Ir a diapositiva ${i + 1}"></button>
+      `).join('');
+    }
+
+    function renderSlide() {
+      const slide = slides[currentSlide];
+      slideContent.innerHTML = slide.render(currentStep);
+      slideNum.textContent = currentSlide + 1;
+
+      // Update Navigation Buttons State
+      btnPrev.disabled = (currentSlide === 0 && currentStep === 0);
+      btnPrev.classList.toggle('opacity-40', btnPrev.disabled);
+      btnPrev.classList.toggle('cursor-not-allowed', btnPrev.disabled);
+
+      const isLast = (currentSlide === slides.length - 1) && (currentStep === slide.maxSteps);
+      btnNext.textContent = isLast ? 'Finalizar' : 'Siguiente';
+      btnNext.classList.toggle('bg-brand-terra', !isLast);
+      btnNext.classList.toggle('bg-emerald-600', isLast);
+
+      renderDots();
+    }
+
+    function nextStep() {
+      const slide = slides[currentSlide];
+      if (currentStep < slide.maxSteps) {
+        currentStep++;
+        renderSlide();
+      } else if (currentSlide < slides.length - 1) {
+        currentSlide++;
+        currentStep = 0;
+        renderSlide();
+      }
+    }
+
+    function prevStep() {
+      if (currentStep > 0) {
+        currentStep--;
+        renderSlide();
+      } else if (currentSlide > 0) {
+        currentSlide--;
+        currentStep = slides[currentSlide].maxSteps;
+        renderSlide();
+      }
+    }
+
+    function goToSlide(idx) {
+      if (idx >= 0 && idx < slides.length) {
+        currentSlide = idx;
+        currentStep = 0;
+        renderSlide();
+      }
+    }
+
+    function checkQuiz(index, btnElement) {
+      const opts = document.querySelectorAll('.quiz-opt');
+      const feedback = document.getElementById('quiz-feedback');
+
+      // Reset styles
+      opts.forEach(el => {
+        el.className = 'quiz-opt w-full text-left p-3.5 rounded-xl bg-stone-800/90 border border-stone-700/80 transition flex items-center justify-between group active:scale-[0.99]';
+        const badge = el.querySelector('.opt-badge');
+        badge.classList.add('opacity-0');
+      });
+
+      const badge = btnElement.querySelector('.opt-badge');
+
+      if (index === 1) { // Option B is CORRECT
+        btnElement.classList.remove('bg-stone-800/90', 'border-stone-700/80');
+        btnElement.classList.add('bg-emerald-950/80', 'border-emerald-500', 'anim-success');
+        badge.textContent = '¡Correcto!';
+        badge.className = 'opt-badge text-xs px-2.5 py-1 rounded-md font-bold bg-emerald-500 text-slate-950 opacity-100';
+
+        feedback.innerHTML = `
+          <div class="anim-pop bg-emerald-900/40 border border-emerald-500/50 rounded-xl p-2.5 text-center text-xs text-emerald-200">
+            <strong>✓ ¡Excelente!</strong> Omitió los ceros a la izquierda (<span class="font-mono">0db8→db8</span>) y comprimió los 5 hextetos en cero consecutivos en un solo <span class="font-mono font-bold">::</span>.
+          </div>
+        `;
+      } else { // Option A or C are INCORRECT
+        btnElement.classList.remove('bg-stone-800/90', 'border-stone-700/80');
+        btnElement.classList.add('bg-rose-950/80', 'border-rose-500', 'anim-shake');
+        badge.textContent = 'Incorrecto';
+        badge.className = 'opt-badge text-xs px-2.5 py-1 rounded-md font-bold bg-rose-500 text-white opacity-100';
+
+        const reason = index === 0 
+          ? 'No puedes colocar dos veces el símbolo :: en una misma dirección.'
+          : 'Falta comprimir la secuencia de ceros consecutivos con ::';
+
+        feedback.innerHTML = `
+          <div class="anim-pop bg-rose-900/40 border border-rose-500/50 rounded-xl p-2.5 text-center text-xs text-rose-200">
+            <strong>✕ Incorrecto:</strong> ${reason}
+          </div>
+        `;
+      }
+    }
+
+    function setupEventListeners() {
+      // Keyboard Navigation
+      document.addEventListener('keydown', (e) => {
+        if (['ArrowRight', 'Space', 'Enter', 'PageDown'].includes(e.code)) {
+          e.preventDefault();
+          nextStep();
+        } else if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.code)) {
+          e.preventDefault();
+          prevStep();
+        }
+      });
+
+      // Stage Click to advance (excluding buttons)
+      document.getElementById('slide-content').addEventListener('click', (e) => {
+        if (!e.target.closest('button') && !e.target.closest('.quiz-opt')) {
+          nextStep();
+        }
+      });
+    }
+
+    // Launch Application
+    window.onload = init;
+  </script>
 </body>
 </html>
- 
